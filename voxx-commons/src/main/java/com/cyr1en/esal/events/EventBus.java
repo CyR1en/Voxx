@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  * This implementation as mentioned above, is multithreaded, therefore it won't block
  * the main thread. Multithreading is handled through an {@link ExecutorService} that
  * we can set. By default, the executor service is set as a single thread executor.
- * However, if we chose to set {@link ThreadPoolExecutor} instead, we can do so
+ * However, if we chose to set a {@link ThreadPoolExecutor} instead, we can do so
  * and the {@link EventBus#post(Object)} function will adapt accordingly.
  * <p>
  * Usage of this map is very simple. Any object can be an event if we chose to do so.
@@ -100,6 +100,21 @@ public class EventBus {
                 });
     }
 
+    /**
+     * Function that invokes all the listeners for the event T.
+     * <p>
+     * This is a generic function that would accept any type T objects as a parameter
+     * and see if the class for that type is registered in the listener map.
+     * <p>
+     * If the Supplier supplies a {@link ThreadPoolExecutor}, this function will take
+     * advantage of that instead of making a new single-thread executor for every listener.
+     * <p>
+     * Since this invokes each listener across multiple threads, use `synchronized` for objects
+     * that contains sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
+     *
+     * @param event event to post.
+     * @param <T>   The type of the event.
+     */
     public <T> void post(T event) {
         Class<?> eventType = event.getClass();
         var eventListeners = listenerMap.get(eventType);
@@ -107,7 +122,6 @@ public class EventBus {
 
         var executor = executorServiceSupplier.get();
         var isThreadPool = executor instanceof ThreadPoolExecutor;
-        System.out.println("Is Thread Pool: " + isThreadPool);
         for (var listener : eventListeners) {
             if (!isThreadPool) executor = executorServiceSupplier.get();
             executor.execute(() -> {

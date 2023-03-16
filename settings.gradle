@@ -1,0 +1,6 @@
+rootProject.name = 'Project-Voxx'
+
+include 'voxx-commons'
+include 'voxx-server'
+include 'voxx-client'
+

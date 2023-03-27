@@ -136,22 +136,46 @@ public class EventBus {
         if (isThreadPool) executor.shutdown();
     }
 
-
+    /**
+     * A utility class that contains reference to the listener/event listener {@link Methodxx
+     * and the
+     */
     public static class ListenerMethod {
 
         private final Listener listenerInstance;
         private final Method method;
 
+        /**
+         * Constructor, pass instance reference for the object that reflects the {@link Method}
+         *
+         * @param listenerInstance Instance of the method
+         * @param method           reflected method from the instance
+         */
         public ListenerMethod(Listener listenerInstance, Method method) {
             this.listenerInstance = listenerInstance;
             this.method = method;
         }
 
+        /**
+         * Reflectively invoke the {@link Method} that was passed in the constructor using
+         * the matching {@link Listener} instance.
+         * <p>
+         *
+         * @param args Parameters for the method.
+         * @throws InvocationTargetException When the method could not be invoked due to improper param
+         * @throws IllegalAccessException    When the method is not accessible through reflection without
+         *                                   doing the necessary steps to unlock it.
+         */
         public void invoke(Object... args) throws InvocationTargetException, IllegalAccessException {
             method.invoke(listenerInstance, args);
         }
     }
 
+
+    /**
+     * A super basic listener that does not have any methods to implement. It's sole purpose is purely
+     * semantics so that in code, it is clear that we're actually dealing with listeners for an event.¬
+     */
     public interface Listener {
     }
 

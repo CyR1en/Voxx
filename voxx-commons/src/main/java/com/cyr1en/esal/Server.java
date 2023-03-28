@@ -2,6 +2,8 @@ package com.cyr1en.esal;
 
 import com.cyr1en.esal.events.EventBus;
 import com.cyr1en.esal.events.server.ClientConnectEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,6 +13,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
+
+    public static final Logger LOGGER = LogManager.getLogger(Server.class);
+
     private final int port;
     private final int backlog;
     private final EventBus eventBus;
@@ -35,9 +40,11 @@ public class Server implements Runnable {
             serverSocket = new ServerSocket(port, backlog);
             serverSocket.setReuseAddress(true);
 
+            LOGGER.info("Server abstraction layer started");
+
             while (true) {
                 var clientSocket = serverSocket.accept();
-
+                LOGGER.info("New client accepted " + clientSocket.getLocalAddress().getHostAddress());
                 var executorService = Executors.newSingleThreadExecutor();
                 var clientConnection = new ClientConnection(clientSocket, eventBus);
                 clientConnections.add(clientConnection);

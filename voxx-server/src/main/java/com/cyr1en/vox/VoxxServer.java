@@ -20,7 +20,6 @@ public class VoxxServer {
         this.serverEventBus.subscribeListeners(new ConnectionListener());
     }
 
-
     public static void main(String[] args) {
         new VoxxServer();
     }

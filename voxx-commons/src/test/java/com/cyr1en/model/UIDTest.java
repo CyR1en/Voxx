@@ -20,7 +20,7 @@ public class UIDTest {
                 list.add(uid);
                 exec.shutdown();
             });
-            //if (i % 10 == 0) Thread.sleep(0);
+            if (i % 3 == 0) Thread.sleep(1000);
         }
 
         // Allow the UID generation to finish

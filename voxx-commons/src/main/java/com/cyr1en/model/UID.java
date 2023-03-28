@@ -1,11 +1,10 @@
 package com.cyr1en.model;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 
 /**
  * A class that represents a uniquely identifiable descriptor.
@@ -15,7 +14,7 @@ import java.util.concurrent.Executors;
  */
 public class UID {
 
-    // A random arbitrary date that I picked.
+    // An arbitrary date that I picked.
     // It's important that we change the epoch so that the IDs could also be unique beyond this application.
     public static long TIME_EPOCH = 0x64b62a60;
 
@@ -45,6 +44,16 @@ public class UID {
      */
     public long getTimestamp() {
         return timestamp;
+    }
+
+    /**
+     * Get a {@link LocalDateTime} representation of the timestamp of this UID.
+     *
+     * @return LDT of the millis timestamp
+     */
+    public LocalDateTime getLDT() {
+        var offSetMillis = getTimestamp();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(offSetMillis), ZoneId.systemDefault());
     }
 
     /**
@@ -104,91 +113,44 @@ public class UID {
 
     @Override
     public String toString() {
-        return String.format("UID: %d (%d)(%d)", asLong(), timestamp, id);
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        var list = new ArrayList<UID>();
-
-
-        for (int i = 0; i < 50; i++) {
-            var exec = Executors.newSingleThreadExecutor();
-            exec.execute(() -> {
-                var uid = UIDGenerator.generate();
-                if (Objects.nonNull(uid)) list.add(uid);
-                exec.shutdown();
-            });
-            if (i % 3 == 0) Thread.sleep(500);
-        }
-
-        list.sort((o1, o2) -> {
-            var diff = (int) (o1.getTimestamp() - o2.getTimestamp());
-            return diff == 0 ? o1.getId() - o2.getId() : diff;
-        });
-
-        Thread.sleep(1000);
-        System.out.println("UID generated count: " + list.size());
-        System.out.println();
-        list.forEach(uid -> {
-            System.out.println(uid);
-            System.out.println("UID-TS: " + uid.getTimestamp());
-            System.out.println("UID-ID: " + uid.getId());
-            System.out.println("--------------------------------");
-        });
-
-        list.forEach(uid -> {
-            if (list.stream().filter(uid::equals).count() > 1)
-                System.out.println(uid + " is not unique");
-            else
-                System.out.println(uid + " is unique");
-        });
+        var formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
+        return String.format("UID: %d (%d)(%d) (ts: %s)", asLong(), timestamp, id, getLDT().format(formatter));
     }
 
     /**
-     * A thread safe utility class to generate UID across multiple threads.
+     * A thread safe utility class to generate {@link UID} across multiple threads.
      * <p>
      * This should allow for when multiple threads requests to generate a UID on the same timestamp and
      * using the first 12 bits of the 54 bits that's used to store their incremental count.
      */
-    public static class UIDGenerator {
+    public static class Generator {
 
-        private static final ConcurrentHashMap<Long, Integer> timestampTracker = new ConcurrentHashMap<>();
+        private static long lastGen;
+        private static int incremental = 0;
 
         /**
-         * A non-synchronized method that a thread would call to allow for tracking of timestamps.
+         * A synchronized method that generates UID for absolute unique identifiable descriptor
+         * <p>
+         * Since time only moves forward and last 52 bits is set to that bits. We just need to check
+         * if we're still generating within the same timestamp. If we are, we increment the incremental
+         * part of the UID which is the first 12 bits. Allowing us to have up to 4095 (0xFFF) incremental
+         * descriptors for a timestamp.
+         * <p>
+         * It's highly unlikely that we will punch through 4095 (0xFFF) incrementation with our application. Even
+         * if 4095 clients connect to the server, not all of them will request a UID generation simultaneously.
+         * <p>
+         * Without the synchronized keyword, this function should still generate UIDs without collisions, but to be
+         * thread-safe, I've decided to use synchronized.
          *
          * @return A generated {@link  UID}.
          */
-        @Nullable
         public synchronized static UID generate() {
             var timestamp = System.currentTimeMillis() - TIME_EPOCH;
-            System.out.println("Generating with timestamp: " + timestamp);
-            System.out.println("Thread: " + Thread.currentThread());
-            synchronized (timestampTracker) {
-                if (timestampTracker.containsKey(timestamp)) {
-                    var curr = timestampTracker.get(timestamp);
-                    timestampTracker.replace(timestamp, curr + 1);
-                } else {
-                    timestampTracker.put(timestamp, 0);
-                }
-            }
-            return generateSync(timestamp);
-        }
-
-        /**
-         * A synchronized way to generate {@link UID} to prevent making the same UID.
-         *
-         * @param timestamp provide the timestamp to generate the {@link UID} with.
-         * @return a purely unique ID.
-         */
-        private static synchronized UID generateSync(long timestamp) {
-            var count = timestampTracker.get(timestamp);
-            if (Objects.isNull(count)) return null;
-            System.out.println("Inc id: " + (0xFFF & count));
-            var uidLong = (timestamp << 12) | (0xFFF & count);
-            var uid = UID.of(uidLong);
-            timestampTracker.computeIfPresent(timestamp, (k, v) -> v - 1);
-            return uid;
+            incremental = lastGen == timestamp ? incremental + 1 : 0;
+            var uidLong = (timestamp << 12) | (0xFFF & incremental);
+            var out = UID.of(uidLong);
+            lastGen = timestamp;
+            return out;
         }
     }
 

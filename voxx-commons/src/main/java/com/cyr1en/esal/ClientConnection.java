@@ -5,6 +5,7 @@ import com.cyr1en.esal.events.server.ClientDisconnectEvent;
 import com.cyr1en.esal.events.server.ClientMessageEvent;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class ClientConnection implements Runnable {
@@ -15,6 +16,7 @@ public class ClientConnection implements Runnable {
     private final PrintWriter out;
     private boolean isRunning;
 
+    private final String remoteAddress;
 
     public ClientConnection(Socket clientSocket, EventBus eventBus) {
         this.clientSocket = clientSocket;
@@ -26,6 +28,12 @@ public class ClientConnection implements Runnable {
             throw new RuntimeException(e);
         }
         isRunning = false;
+        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress())
+                .toString().replace("/", "");
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
     }
 
     public Socket getClientSocket() {
@@ -47,8 +55,11 @@ public class ClientConnection implements Runnable {
     public void close() {
         try {
             if (!clientSocket.isClosed()) {
+                in.close();
+                out.close();
                 clientSocket.close();
                 eventBus.post(new ClientDisconnectEvent(this));
+                isRunning = false;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -58,20 +69,20 @@ public class ClientConnection implements Runnable {
     @Override
     public void run() {
         if (isRunning) {
-            System.err.println("This client runnable is already running!");
+            Server.LOGGER.warn("This client runnable is already running!");
             return;
         }
 
         isRunning = true;
-        while (!clientSocket.isClosed() && isRunning) {
-            try {
-                String inLine;
-                while ((inLine = in.readLine()) != null)
-                    eventBus.post(new ClientMessageEvent(this, inLine));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
 
+        try {
+            String inLine;
+            while ((inLine = in.readLine()) != null)
+                eventBus.post(new ClientMessageEvent(this, inLine));
+            close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 }

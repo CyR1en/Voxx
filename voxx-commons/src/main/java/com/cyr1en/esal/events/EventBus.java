@@ -137,7 +137,7 @@ public class EventBus {
     }
 
     /**
-     * A utility class that contains reference to the listener/event listener {@link Methodxx
+     * A utility class that contains reference to the listener/event listener {@link Method
      * and the
      */
     public static class ListenerMethod {

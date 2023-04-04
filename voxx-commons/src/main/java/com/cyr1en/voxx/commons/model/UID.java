@@ -1,4 +1,4 @@
-package com.cyr1en.model;
+package com.cyr1en.voxx.commons.model;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

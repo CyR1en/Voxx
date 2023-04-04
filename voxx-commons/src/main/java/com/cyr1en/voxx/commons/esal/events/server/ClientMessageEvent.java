@@ -1,6 +1,6 @@
-package com.cyr1en.esal.events.server;
+package com.cyr1en.voxx.commons.esal.events.server;
 
-import com.cyr1en.esal.ClientConnection;
+import com.cyr1en.voxx.commons.esal.ClientConnection;
 
 /**
  * Event that's called whenever a client sends a message to the server.

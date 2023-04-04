@@ -1,11 +1,11 @@
-package com.cyr1en.model;
+package com.cyr1en.voxx.commons.model;
 
 public class User {
 
     private final UID uid;
     private String username;
 
-    private User(UID uid, String username) {
+    public User(UID uid, String username) {
         this.uid = uid;
         this.username = username;
     }

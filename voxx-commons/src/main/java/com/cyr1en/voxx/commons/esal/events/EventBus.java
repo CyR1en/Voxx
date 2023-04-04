@@ -1,6 +1,6 @@
-package com.cyr1en.esal.events;
+package com.cyr1en.voxx.commons.esal.events;
 
-import com.cyr1en.esal.events.annotation.EventListener;
+import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * <p>
  * Usage of this map is very simple. Any object can be an event if we chose to do so.
  * To make a listener for that event, we can make a class that implements {@link Listener}
- * and make a function with the annotation {@link EventListener} and have its parameter
+ * and make a function with the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} and have its parameter
  * set as the event type we want to listen to. To invoke the listeners, we need to call
  * {@link EventBus#post(Object)} passing our instance of the event.
  */
@@ -52,9 +52,9 @@ public class EventBus {
     }
 
     /**
-     * Subscribe all of the {@link EventListener} in the class.
+     * Subscribe all of the {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} in the class.
      *
-     * @param listener Object with functions annotated with {@link EventListener}
+     * @param listener Object with functions annotated with {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
      */
     public void subscribeListeners(Listener listener) {
         iterateAnnotatedFunctions(listener, (clazz, method) -> {
@@ -64,9 +64,9 @@ public class EventBus {
     }
 
     /**
-     * unsubscribe all of the {@link EventListener} in the class.
+     * unsubscribe all of the {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} in the class.
      *
-     * @param listener Object with functions annotated with {@link EventListener}
+     * @param listener Object with functions annotated with {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
      */
     public void unsubscribeListeners(Listener listener) {
         iterateAnnotatedFunctions(listener, (clazz, method) -> {
@@ -80,10 +80,10 @@ public class EventBus {
 
     /**
      * A helper function to iterate through every function in the {@link Listener} object with
-     * the annotation {@link EventListener}
+     * the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
      * <p>
      * This uses reflection that looks at the declared methods in the class and filters methods
-     * with the {@link EventListener} annotation. After that it checks if it exactly has one parameter
+     * with the {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} annotation. After that it checks if it exactly has one parameter
      * because we are only trying to have one event to listen to for this function. If that condition
      * is satisfied, it will accept the {@link BiConsumer} (as a callback function) passing the type of the
      * parameter and the {@link Method} itself.
@@ -93,7 +93,7 @@ public class EventBus {
      */
     private void iterateAnnotatedFunctions(Listener listener, BiConsumer<Class<?>, Method> onVisit) {
         var methods = listener.getClass().getDeclaredMethods();
-        Arrays.stream(methods).filter(method -> method.isAnnotationPresent(EventListener.class))
+        Arrays.stream(methods).filter(method -> method.isAnnotationPresent(com.cyr1en.voxx.commons.esal.events.annotation.EventListener.class))
                 .forEach(filtered -> {
                     if (filtered.getParameterCount() > 1) return;
                     onVisit.accept(filtered.getParameterTypes()[0], filtered);
@@ -187,7 +187,7 @@ public class EventBus {
 
     static class SomeListener implements Listener {
 
-        @EventListener
+        @com.cyr1en.voxx.commons.esal.events.annotation.EventListener
         public void handle(OnConnectionEvent event) {
             try {
                 Thread.sleep(5000);
@@ -197,7 +197,7 @@ public class EventBus {
             event.printHello("World");
         }
 
-        @EventListener
+        @com.cyr1en.voxx.commons.esal.events.annotation.EventListener
         public void handle1(OnConnectionEvent event) {
             event.printHello("Boobs");
         }

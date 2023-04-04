@@ -8,5 +8,5 @@
  * @author CyR1en
  * @version 1.0
  */
-package com.cyr1en.esal;
+package com.cyr1en.voxx.commons.esal;
 

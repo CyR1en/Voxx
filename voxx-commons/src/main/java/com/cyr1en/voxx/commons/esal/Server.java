@@ -1,7 +1,7 @@
-package com.cyr1en.esal;
+package com.cyr1en.voxx.commons.esal;
 
-import com.cyr1en.esal.events.EventBus;
-import com.cyr1en.esal.events.server.ClientConnectEvent;
+import com.cyr1en.voxx.commons.esal.events.EventBus;
+import com.cyr1en.voxx.commons.esal.events.server.ClientConnectEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

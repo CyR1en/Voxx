@@ -1,4 +1,4 @@
-package com.cyr1en.protocol;
+package com.cyr1en.voxx.commons.protocol;
 
 import java.util.Map;
 

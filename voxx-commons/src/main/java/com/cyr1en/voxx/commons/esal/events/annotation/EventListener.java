@@ -1,4 +1,4 @@
-package com.cyr1en.esal.events.annotation;
+package com.cyr1en.voxx.commons.esal.events.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

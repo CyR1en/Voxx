@@ -1,8 +1,8 @@
-package com.cyr1en.esal;
+package com.cyr1en.voxx.commons.esal;
 
-import com.cyr1en.esal.events.EventBus;
-import com.cyr1en.esal.events.server.ClientDisconnectEvent;
-import com.cyr1en.esal.events.server.ClientMessageEvent;
+import com.cyr1en.voxx.commons.esal.events.EventBus;
+import com.cyr1en.voxx.commons.esal.events.server.ClientDisconnectEvent;
+import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -28,8 +28,7 @@ public class ClientConnection implements Runnable {
             throw new RuntimeException(e);
         }
         isRunning = false;
-        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress())
-                .toString().replace("/", "");
+        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
     }
 
     public String getRemoteAddress() {
@@ -50,6 +49,11 @@ public class ClientConnection implements Runnable {
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    public void sendMessage(String message) {
+        var cleaned = message.replaceAll("[\\n\\s+]", "");
+        out.println(cleaned);
     }
 
     public void close() {
@@ -77,8 +81,7 @@ public class ClientConnection implements Runnable {
 
         try {
             String inLine;
-            while ((inLine = in.readLine()) != null)
-                eventBus.post(new ClientMessageEvent(this, inLine));
+            while ((inLine = in.readLine()) != null) eventBus.post(new ClientMessageEvent(this, inLine));
             close();
         } catch (IOException e) {
             throw new RuntimeException(e);

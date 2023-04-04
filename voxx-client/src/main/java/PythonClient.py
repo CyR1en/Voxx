@@ -2,7 +2,7 @@ import tkinter as tk
 import websockets
 
 # Define the WebSocket server URL and port
-websocket = "ws://localhost:8000/ws"
+server_url = "ws://localhost:8000/ws"
 
 
 def send_message(websocket, message):
@@ -22,7 +22,7 @@ def receive_message(websocket):
 
 def main():
     # Connect to the WebSocket server
-    with websockets.connect(SERVER_URL) as websocket:
+    with websockets.connect(server_url) as websocket:
         # Send a message to the JavaFX client
         await send_message((websocket,  "PY|" + websocket.username + "|" + message).encode("utf-8"))
 

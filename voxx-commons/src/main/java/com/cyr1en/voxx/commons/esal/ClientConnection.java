@@ -3,6 +3,9 @@ package com.cyr1en.voxx.commons.esal;
 import com.cyr1en.voxx.commons.esal.events.EventBus;
 import com.cyr1en.voxx.commons.esal.events.server.ClientDisconnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
+import com.cyr1en.voxx.commons.model.User;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -15,6 +18,7 @@ public class ClientConnection implements Runnable {
     private final BufferedReader in;
     private final PrintWriter out;
     private boolean isRunning;
+    private User assocUser;
 
     private final String remoteAddress;
 
@@ -28,7 +32,17 @@ public class ClientConnection implements Runnable {
             throw new RuntimeException(e);
         }
         isRunning = false;
-        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
+        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress()).
+                toString().replace("/", "");
+    }
+
+    public void setAssocUser(@NotNull User user) {
+        this.assocUser = user;
+    }
+
+    @Nullable
+    public User getAssocUser() {
+        return assocUser;
     }
 
     public String getRemoteAddress() {
@@ -52,7 +66,7 @@ public class ClientConnection implements Runnable {
     }
 
     public void sendMessage(String message) {
-        var cleaned = message.replaceAll("[\\n\\s+]", "");
+        var cleaned = message.replaceAll("\\s{2,}|\\n", "");
         out.println(cleaned);
     }
 

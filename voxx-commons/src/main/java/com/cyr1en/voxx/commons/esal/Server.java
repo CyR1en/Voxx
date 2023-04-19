@@ -32,6 +32,10 @@ public class Server implements Runnable {
         return eventBus;
     }
 
+    public ArrayList<ClientConnection> getClientConnections() {
+        return clientConnections;
+    }
+
     @Override
     public void run() {
         ServerSocket serverSocket = null;

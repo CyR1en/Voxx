@@ -35,11 +35,13 @@ public class JavaClient {
         output.println(username);
 
 
+        /*
         public Message sendMessage(String content) {
             output.println(content);
         }
+         */
 
-
+        /*
         public static void main(String[]args) throws IOException {
             JavaClient client = new JavaClient("localhost", 1024);
 
@@ -55,5 +57,6 @@ public class JavaClient {
                 }
             }
         }
+        */
     }
 }

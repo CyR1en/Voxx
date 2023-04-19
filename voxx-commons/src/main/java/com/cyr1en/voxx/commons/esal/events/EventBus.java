@@ -179,44 +179,4 @@ public class EventBus {
     public interface Listener {
     }
 
-    static class OnConnectionEvent {
-        public void printHello(String message) {
-            System.out.println("Hello! " + message);
-        }
-    }
-
-    static class SomeListener implements Listener {
-
-        @com.cyr1en.voxx.commons.esal.events.annotation.EventListener
-        public void handle(OnConnectionEvent event) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            event.printHello("World");
-        }
-
-        @com.cyr1en.voxx.commons.esal.events.annotation.EventListener
-        public void handle1(OnConnectionEvent event) {
-            event.printHello("Boobs");
-        }
-
-        @EventListener
-        public void handle2(OnConnectionEvent event) {
-            event.printHello("Pogger");
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        var eventBus = new EventBus();
-        eventBus.setExecutorServiceSupplier(Executors::newCachedThreadPool);
-        eventBus.subscribeListeners(new SomeListener());
-
-        eventBus.post(new OnConnectionEvent());
-        Thread.sleep(100);
-        System.out.println("Lit");
-        eventBus.post(new OnConnectionEvent());
-    }
-
 }

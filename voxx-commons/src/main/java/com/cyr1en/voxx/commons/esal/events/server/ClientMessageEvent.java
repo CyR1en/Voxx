@@ -19,6 +19,7 @@ public class ClientMessageEvent {
         return clientConnection;
     }
 
+
     public void setClientConnection(ClientConnection clientConnection) {
         this.clientConnection = clientConnection;
     }

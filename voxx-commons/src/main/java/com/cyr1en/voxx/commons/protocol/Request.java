@@ -7,8 +7,4 @@ import java.util.Map;
 public interface Request {
 
     void onRequest(ClientMessageEvent event);
-
-    String getRequestID();
-
-    Map<String, Object> getParams();
 }

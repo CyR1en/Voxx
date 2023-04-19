@@ -1,5 +1,6 @@
 package com.cyr1en.voxx.server;
 
+import com.cyr1en.voxx.commons.esal.ClientConnection;
 import com.cyr1en.voxx.commons.esal.Server;
 import com.cyr1en.voxx.commons.esal.events.EventBus;
 import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
@@ -10,6 +11,7 @@ import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import com.cyr1en.voxx.server.protocol.ProtocolHandler;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VoxxServer extends Server implements EventBus.Listener {
@@ -25,6 +27,14 @@ public class VoxxServer extends Server implements EventBus.Listener {
         run();
     }
 
+    public synchronized void broadcastWithExclusion(User user, String message) {
+        for (ClientConnection cc : getClientConnections()) {
+            var userAssociated = Objects.nonNull(cc.getAssocUser());
+            if (!userAssociated || user.getUid().equals(cc.getAssocUser().getUid())) continue;
+            cc.sendMessage(message);
+        }
+    }
+
     @EventListener
     public void onClientConnect(ClientConnectEvent event) {
         Server.LOGGER.info("[Vox] New client ({}) connected", event.clientConnection().getRemoteAddress());
@@ -34,9 +44,7 @@ public class VoxxServer extends Server implements EventBus.Listener {
     @EventListener
     public void onClientMessage(ClientMessageEvent event) {
         var msg = event.getMessage();
-        var client = event.getClientConnection();
         Server.LOGGER.info("[Vox] Client said: " + msg);
-        client.getOut().println("[Vox] Response");
         protocolHandler.handOnMessage(event);
     }
 
@@ -62,15 +70,15 @@ public class VoxxServer extends Server implements EventBus.Listener {
             userMap = new ConcurrentHashMap<>();
         }
 
-        public boolean registerNewUser(String username) {
-            if (isRegistered(username)) return false;
+        public synchronized User registerNewUser(String username) {
+            if (isRegistered(username)) return null;
             var uid = UID.Generator.generate();
             var user = new User(uid, username);
             userMap.put(username, user);
-            return true;
+            return user;
         }
 
-        public boolean isRegistered(String username) {
+        public synchronized boolean isRegistered(String username) {
             return userMap.containsKey(username);
         }
 

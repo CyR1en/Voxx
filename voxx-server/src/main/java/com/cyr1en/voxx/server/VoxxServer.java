@@ -7,9 +7,12 @@ import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
 import com.cyr1en.voxx.commons.esal.events.server.ClientConnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientDisconnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
+import com.cyr1en.voxx.commons.model.Message;
 import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
+import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
 import com.cyr1en.voxx.server.protocol.ProtocolHandler;
+import org.json.JSONObject;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,11 +30,12 @@ public class VoxxServer extends Server implements EventBus.Listener {
         run();
     }
 
-    public synchronized void broadcastWithExclusion(User user, String message) {
+    public synchronized void broadcastWithExclusion(User user, JSONObject object) {
         for (ClientConnection cc : getClientConnections()) {
             var userAssociated = Objects.nonNull(cc.getAssocUser());
-            if (!userAssociated || user.getUid().equals(cc.getAssocUser().getUid())) continue;
-            cc.sendMessage(message);
+            if (!userAssociated || user.getUID().equals(cc.getAssocUser().getUID())) continue;
+            LOGGER.info("Broadcasting to: " + cc.getRemoteAddress());
+            cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
         }
     }
 
@@ -52,6 +56,15 @@ public class VoxxServer extends Server implements EventBus.Listener {
     public void onClientDisconnect(ClientDisconnectEvent event) {
         Server.LOGGER.info("[Vox] Client ({}) disconnected", event.clientConnection().getRemoteAddress());
         protocolHandler.handleOnDisconnect(event);
+        if (event.clientConnection().getAssocUser() == null) return;
+        var user = event.clientConnection().getAssocUser();
+        userRegistry.userMap.remove(user.getUsername());
+        var responseJson = new JSONObject();
+        responseJson.put("update-message", "ud");
+        var body = new JSONObject().put("user", new JSONObject().put("uid", user.getUID().asLong())
+                .put("uname", user.getUsername()));
+        responseJson.put("body", body);
+        broadcastWithExclusion(event.clientConnection().getAssocUser(), responseJson);
     }
 
     public UserRegistry getUserRegistry() {
@@ -82,6 +95,9 @@ public class VoxxServer extends Server implements EventBus.Listener {
             return userMap.containsKey(username);
         }
 
+        public ConcurrentHashMap<String, User> getUserMap() {
+            return userMap;
+        }
     }
 
 }

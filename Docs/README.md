@@ -157,8 +157,8 @@ When a chat message request was handled properly the server should respond with 
   "response-id": 1,
   "body": {
     "message": {
-      "message-uid": 6884583351369728,
-      "message-content": "{message sent}"
+      "uid": 6884583351369728,
+      "content": "{message sent}"
     }
   }
 }
@@ -260,7 +260,7 @@ This is sent by the server to all the clients when a user sends a new chat messa
 
 ```json
 {
-  "update-message": "ns",
+  "update-message": "nm",
   "body": {
     "sender": {
       "uid": 6884583359643650,

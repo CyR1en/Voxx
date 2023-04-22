@@ -47,6 +47,19 @@ public class UID {
     }
 
     /**
+     * Get a {@link String} representation of the timestamp of this UID.
+     * with the following format: "(month-day-year) at (hour):(minute) (AM|PM)"
+     *
+     * @return String of the millis timestamp
+     */
+    public String getTimestampString() {
+        var offSetMillis = getTimestamp();
+        var ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(offSetMillis), ZoneId.systemDefault());
+        var formatter = DateTimeFormatter.ofPattern("M/d/yy h:mm a");
+        return ldt.format(formatter);
+    }
+
+    /**
      * Get a {@link LocalDateTime} representation of the timestamp of this UID.
      *
      * @return LDT of the millis timestamp

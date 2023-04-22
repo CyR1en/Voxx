@@ -10,7 +10,7 @@ public class User {
         this.username = username;
     }
 
-    public UID getUid() {
+    public UID getUID() {
         return uid;
     }
 

@@ -6,8 +6,6 @@ import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;
 import org.json.JSONObject;
 
-import java.util.Objects;
-
 public class RegisterUser implements Request {
 
     private static final String INCORRECT_ARG;
@@ -57,13 +55,17 @@ public class RegisterUser implements Request {
                     remoteAddr);
         } else {
             var user = userRegistry.registerNewUser(uname);
-            if (Objects.isNull(user)) {
-                Server.LOGGER.error("[Vox] Error registering user: {} for Client ({})", uname, remoteAddr);
-                return;
-            }
+            event.getClientConnection().setAssocUser(user);
             Server.LOGGER.info("[Vox] Client ({}) registered as user: {}", remoteAddr, uname);
             event.getClientConnection().sendMessage(String.format(RESPONSE, "\"response-id\": 1",
-                    user.getUid().asLong(), user.getUsername()));
+                    user.getUID().asLong(), user.getUsername()));
+
+            var responseJson = new JSONObject();
+            responseJson.put("update-message", "nu");
+            var body = new JSONObject().put("user", new JSONObject().put("uid", user.getUID().asLong())
+                    .put("uname", user.getUsername()));
+            responseJson.put("body", body);
+            voxx.broadcastWithExclusion(user, responseJson);
         }
     }
 

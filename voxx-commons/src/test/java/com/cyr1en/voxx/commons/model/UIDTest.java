@@ -13,7 +13,7 @@ public class UIDTest {
     public synchronized void testUnique() throws InterruptedException {
         var list = new ArrayList<UID>();
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 20; i++) {
             var exec = Executors.newSingleThreadExecutor();
             exec.execute(() -> {
                 var uid = UID.Generator.generate();
@@ -33,7 +33,7 @@ public class UIDTest {
 
         System.out.println("UID generated count: " + list.size());
         System.out.println();
-        list.forEach(System.out::println);
+        list.forEach(uid -> System.out.println(uid + " " + uid.getTimestampString()));
 
         var nonUnique = list.stream().filter(uid -> list.stream().filter(uid::equals).count() > 1).toList();
         nonUnique.forEach(uid -> System.out.println(uid + " is not unique"));

@@ -1,6 +1,7 @@
 package com.cyr1en.voxx.client.controllers;
 
 import com.cyr1en.voxx.client.VoxxApplication;
+import com.cyr1en.voxx.client.connection.ConnectionTask;
 import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import javafx.application.Platform;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class LoginController {
 
     private static final Pattern UNAME_REGEX = Pattern
-            .compile("^[A-Za-z][A-Za-z0-9_]{3,11}$");
+            .compile("^[A-Za-z][A-Za-z0-9_]{3,6}$");
 
     private static final Color F_RED = Color.valueOf("#ff1f1f");
     private static final Color F_GREEN = Color.valueOf("#11A60C");
@@ -118,7 +119,7 @@ public class LoginController {
         }
 
         var exec = Executors.newSingleThreadScheduledExecutor();
-        var task = new VoxxApplication.ConnectionTask(2000, 5);
+        var task = new ConnectionTask(2000, 5);
         task.setOnScheduled(e -> {
             if (voxxApplication.isConnected()) {
                 task.cancel();

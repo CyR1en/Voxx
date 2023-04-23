@@ -4,11 +4,9 @@ import com.cyr1en.voxx.client.connection.ReqResClientConnection;
 import com.cyr1en.voxx.client.controllers.LoginController;
 import com.cyr1en.voxx.commons.model.User;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -64,40 +62,5 @@ public class VoxxApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    public static class ConnectionTask extends Task<ReqResClientConnection> {
-
-        private final int interval;
-        private final int tries;
-
-        public ConnectionTask(int interval, int tries) {
-            this.interval = interval;
-            this.tries = tries;
-        }
-
-        public ConnectionTask() {
-            this(2000, 10);
-        }
-
-        @Override
-        protected ReqResClientConnection call() {
-            var curr_tries = 0;
-            ReqResClientConnection client = null;
-            var last = System.currentTimeMillis();
-            while (Objects.isNull(client) && curr_tries < tries) {
-                if ((System.currentTimeMillis() - last) < interval) continue;
-                System.out.println("Trying to connect to server...");
-                try {
-                    client = new ReqResClientConnection(SERVER_HOST, SERVER_PORT);
-                } catch (IOException e) {
-                    System.err.println("Could not connect to server!");
-                }
-                curr_tries = curr_tries + 1;
-                System.out.printf("Tries: %d%n", curr_tries);
-                last = System.currentTimeMillis();
-            }
-            return client;
-        }
     }
 }

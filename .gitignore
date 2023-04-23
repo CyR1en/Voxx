@@ -1,2 +1,6 @@
 # Project exclude paths
 /.gradle/
+/build/
+/voxx-client/build/
+/voxx-commons/build/
+/voxx-server/build/

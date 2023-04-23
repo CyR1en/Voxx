@@ -6,30 +6,8 @@ Since the last report, we’ve been implementing the Java client and we now have
 
 For Project Voxx Java client, we have two main scenes: `Login scene` and `Chatbox scene`
 
-<img align="left" src="screenshot/UI-login.png" /><img align="left" width="340"  src="screenshot/UI-Chatbox.png" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![](screenshot/UI-login.png)
+![](screenshot/UI-Chatbox.png)
 
 
 To allow us to switch scenes with ease, we also implemented a utility class called `PrimaryStageManager` that contains a function called `#setScene(String fxml, Consumer<T> controllerConsumer)`. This function allows you to pass in a consumer where the instance of the controller is passed just in case you have to call functions of the controller when the fxml is loaded.

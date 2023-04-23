@@ -7,7 +7,6 @@ import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
 import com.cyr1en.voxx.commons.esal.events.server.ClientConnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientDisconnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
-import com.cyr1en.voxx.commons.model.Message;
 import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
@@ -23,7 +22,7 @@ public class VoxxServer extends Server implements EventBus.Listener {
     private final ProtocolHandler protocolHandler;
 
     public VoxxServer() {
-        super(1010, 500);
+        super(8008, 500);
         getEventBus().subscribeListeners(this);
         this.userRegistry = new UserRegistry();
         this.protocolHandler = new ProtocolHandler(this);
@@ -42,6 +41,11 @@ public class VoxxServer extends Server implements EventBus.Listener {
     @EventListener
     public void onClientConnect(ClientConnectEvent event) {
         Server.LOGGER.info("[Vox] New client ({}) connected", event.clientConnection().getRemoteAddress());
+        getClientConnections().forEach(cc -> {
+            if (cc.getRemoteAddress().equals(event.clientConnection().getRemoteAddress()))
+                if (cc.getAssocUser() != null)
+                    event.clientConnection().setAssocUser(cc.getAssocUser());
+        });
         protocolHandler.handleOnConnect(event);
     }
 

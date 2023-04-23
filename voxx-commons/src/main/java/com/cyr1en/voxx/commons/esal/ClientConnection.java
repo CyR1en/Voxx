@@ -67,6 +67,7 @@ public class ClientConnection implements Runnable {
 
     public void sendMessage(String message) {
         var cleaned = message.replaceAll("\\s{2,}|\\n", "");
+        Server.LOGGER.info("Sending: " + cleaned);
         out.println(cleaned);
     }
 

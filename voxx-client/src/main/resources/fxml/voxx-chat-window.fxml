@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="505.0" prefWidth="396.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cyr1en.voxx.client.controllers.ChatController">
+   <children>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#dbdbdb" height="514.0" layoutY="-9.0" stroke="TRANSPARENT" strokeType="INSIDE" width="138.0" />
+      <ImageView fitHeight="25.0" fitWidth="32.0" layoutX="359.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/logo32x32.png" />
+         </image>
+      </ImageView>
+      <HBox layoutX="14.0" layoutY="446.0" prefHeight="45.0" prefWidth="137.0">
+         <children>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Label text="Connected as" textFill="#434343" />
+                  <Label fx:id="unameLabel" text="Username">
+                     <font>
+                        <Font size="19.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <ScrollPane fx:id="cBoxScrollPane" layoutX="150.0" layoutY="54.0" prefHeight="386.0" prefWidth="232.0" stylesheets="@../css/chatbox.css">
+         <content>
+            <VBox fx:id="chatBox" alignment="BOTTOM_RIGHT" prefHeight="382.0" prefWidth="230.0" stylesheets="@../css/chatbox.css">
+               <children>
+                  <VBox alignment="CENTER_LEFT" prefHeight="45.0" prefWidth="230.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label text="Username">
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label text="Today at 10:30 PM" textFill="#949494">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <TextArea editable="false" prefHeight="200.0" prefWidth="230.0" stylesheets="@../css/chatbox.css" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." wrapText="true" />
+                     </children>
+                  </VBox>
+               </children></VBox>
+         </content>
+      </ScrollPane>
+      <Pane layoutX="152.0" layoutY="465.0" prefHeight="28.0" prefWidth="232.0">
+         <children>
+            <AnchorPane prefHeight="28.0" prefWidth="232.0">
+               <children>
+                  <TextField fx:id="msgField" layoutY="-7.0" onKeyReleased="#onKeyReleased" prefHeight="34.0" prefWidth="232.0" promptText="Type message here..." />
+               </children>
+            </AnchorPane>
+         </children>
+      </Pane>
+      <ScrollPane layoutX="14.0" layoutY="37.0" prefHeight="393.0" prefWidth="130.0" stylesheets="@../css/chatbox.css">
+         <content>
+            <ListView fx:id="userList" focusTraversable="false" prefHeight="391.0" prefWidth="123.0" stylesheets="@../css/chatbox.css" />
+         </content></ScrollPane>
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="130.0" text="Connected Users" />
+   </children>
+</AnchorPane>

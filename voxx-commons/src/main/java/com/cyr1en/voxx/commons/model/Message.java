@@ -4,10 +4,12 @@ public class Message {
 
     private final User sender;
     private String content;
+    private final UID messageUID;
 
-    public Message(User sender, String content) {
+    public Message(User sender, String content, UID messageUID) {
         this.sender = sender;
         this.content = content;
+        this.messageUID = messageUID;
     }
 
     public User getSender() {
@@ -16,6 +18,10 @@ public class Message {
 
     public String getContent() {
         return content;
+    }
+
+    public UID getUID() {
+        return messageUID;
     }
 
     public void setContent(String content) {

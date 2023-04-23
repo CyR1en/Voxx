@@ -121,7 +121,7 @@ public class UID {
      * @return long version of UID.
      */
     public long asLong() {
-        return (timestamp << 12) | (0xFFF & id);
+        return (timestamp - TIME_EPOCH) << 12 | (0xFFF & id);
     }
 
     @Override

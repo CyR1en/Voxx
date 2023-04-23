@@ -2,12 +2,20 @@ package com.cyr1en.voxx.commons.model;
 
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 public class UIDTest {
+
+    private static UID uid;
+
+    @BeforeAll
+    public static void init() {
+        uid = UID.Generator.generate();
+    }
 
     @Test
     public synchronized void testUnique() throws InterruptedException {
@@ -38,5 +46,11 @@ public class UIDTest {
         var nonUnique = list.stream().filter(uid -> list.stream().filter(uid::equals).count() > 1).toList();
         nonUnique.forEach(uid -> System.out.println(uid + " is not unique"));
         Assertions.assertEquals(nonUnique.size(), 0);
+    }
+
+    @Test
+    public void testStaticCreation() {
+        var copy = UID.of(uid.asLong());
+        Assertions.assertEquals(uid, copy);
     }
 }

@@ -1,20 +1,36 @@
-plugins {
-    id 'java'
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
 
-group 'com.cyr1en'
-version '1.0-SNAPSHOT'
+    group 'com.cyr1en'
+    version = "1.0.0"
 
-repositories {
-    mavenCentral()
-}
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 
-dependencies {
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-}
+    publishing {
+        repositories {
+            maven {
+                name = "Kakuno"
+                url = uri("https://repo.cyr1en.com/snapshots")
+                credentials {
+                    username = System.getenv("KAKUNO_USER")
+                    password = System.getenv("KAKUNO_TOKEN")
+                }
+            }
+        }
+        publications {
+            gpr(MavenPublication) {
+                from(components.java)
+            }
+        }
+    }
 
-test {
-    useJUnitPlatform()
+    repositories {
+        mavenCentral()
+    }
 }

@@ -24,7 +24,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class ChatController {
 
@@ -143,10 +142,7 @@ public class ChatController {
             reqJson.put("params", new JSONObject().put("message", text));
 
             var response = instance.getClient().sendRequest(reqJson);
-            var body = response.getJSONObject("body");
-            System.out.println(body);
             var resMessage = response.getJSONObject("body").getJSONObject("message");
-            System.out.println(resMessage);
             var message = new Message(this.instance.getAssocUser(), resMessage.getString("content"),
                     UID.of(resMessage.getLong("uid")));
             System.out.println("Adding message");

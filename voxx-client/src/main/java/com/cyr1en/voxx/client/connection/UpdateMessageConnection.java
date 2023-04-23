@@ -16,7 +16,8 @@ public class UpdateMessageConnection implements Runnable {
     public UpdateMessageConnection(String host, int port) throws IOException {
         this.socket = new Socket(host, port);
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        onUpdateMessage = (s) -> {};
+        onUpdateMessage = (s) -> {
+        };
     }
 
     public BufferedReader getReader() {
@@ -37,14 +38,10 @@ public class UpdateMessageConnection implements Runnable {
             String line = null;
             System.out.println("TASK CALL");
             while ((line = getReader().readLine()) != null) {
-                if (!isConnected()) {
-                    System.out.println("I'm here!");
-                    continue;
-                }
+                if (!isConnected()) continue;
                 var json = new JSONObject(line);
                 onUpdateMessage.accept(json);
             }
-            System.out.println("Out of loop");
         } catch (IOException e) {
             e.printStackTrace();
         }

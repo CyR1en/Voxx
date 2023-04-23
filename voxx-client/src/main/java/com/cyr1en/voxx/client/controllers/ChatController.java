@@ -77,9 +77,7 @@ public class ChatController {
         updateMessageConnection.onUpdateMessage(msg -> {
             System.out.println("Update message: " + msg);
             var key = msg.getString("update-message");
-            System.out.println("UpdateMessage Received with key: " + key);
             var body = msg.getJSONObject("body");
-            System.out.println(body);
             switch (key) {
                 case "nu" -> {
                     System.out.println("Adding user");
@@ -145,7 +143,6 @@ public class ChatController {
             var resMessage = response.getJSONObject("body").getJSONObject("message");
             var message = new Message(this.instance.getAssocUser(), resMessage.getString("content"),
                     UID.of(resMessage.getLong("uid")));
-            System.out.println("Adding message");
             addMessage(message);
             msgField.setText("");
             msgField.setPromptText("Type message here...");

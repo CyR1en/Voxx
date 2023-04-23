@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.Socket;
 
-public class ReqResClientConnection implements Runnable {
+public class ReqResClientConnection {
     private final Socket socket;
     private final PrintWriter out;
     private final BufferedReader reader;
@@ -47,8 +47,4 @@ public class ReqResClientConnection implements Runnable {
         return null;
     }
 
-    @Override
-    public void run() {
-
-    }
 }

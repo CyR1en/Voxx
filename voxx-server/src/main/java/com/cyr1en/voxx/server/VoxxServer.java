@@ -32,7 +32,8 @@ public class VoxxServer extends Server implements EventBus.Listener {
     public synchronized void broadcastWithExclusion(User user, JSONObject object) {
         for (ClientConnection cc : getClientConnections()) {
             var userAssociated = Objects.nonNull(cc.getAssocUser());
-            if (!userAssociated || user.getUID().equals(cc.getAssocUser().getUID())) continue;
+            if (!userAssociated || user.getUID().equals(cc.getAssocUser().getUID())
+                    || !cc.isSupplementalConnection()) continue;
             LOGGER.info("Broadcasting to: " + cc.getRemoteAddress());
             cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
         }
@@ -43,8 +44,10 @@ public class VoxxServer extends Server implements EventBus.Listener {
         Server.LOGGER.info("[Vox] New client ({}) connected", event.clientConnection().getRemoteAddress());
         getClientConnections().forEach(cc -> {
             if (cc.getRemoteAddress().equals(event.clientConnection().getRemoteAddress()))
-                if (cc.getAssocUser() != null)
+                if (cc.getAssocUser() != null) {
                     event.clientConnection().setAssocUser(cc.getAssocUser());
+                    event.clientConnection().setSupplementalConnection(true);
+                }
         });
         protocolHandler.handleOnConnect(event);
     }

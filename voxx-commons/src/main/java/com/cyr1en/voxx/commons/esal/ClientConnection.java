@@ -19,12 +19,14 @@ public class ClientConnection implements Runnable {
     private final PrintWriter out;
     private boolean isRunning;
     private User assocUser;
+    private boolean isSupplementalConnection;
 
     private final String remoteAddress;
 
     public ClientConnection(Socket clientSocket, EventBus eventBus) {
         this.clientSocket = clientSocket;
         this.eventBus = eventBus;
+        isSupplementalConnection = false;
         try {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -63,6 +65,14 @@ public class ClientConnection implements Runnable {
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    public void setSupplementalConnection(boolean b) {
+        this.isSupplementalConnection = b;
+    }
+
+    public boolean isSupplementalConnection() {
+        return isSupplementalConnection;
     }
 
     public void sendMessage(String message) {

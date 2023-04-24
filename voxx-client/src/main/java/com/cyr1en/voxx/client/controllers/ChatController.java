@@ -44,7 +44,6 @@ public class ChatController {
 
     private VoxxApplication instance;
     private final User system;
-    private UpdateMessageConnection updateMessageConnection;
 
     public ChatController() throws IOException {
         this.userList = new ListView<>();
@@ -74,8 +73,8 @@ public class ChatController {
 
     private void connectSupplemental() {
         try {
-            this.updateMessageConnection = new UpdateMessageConnection(instance.getAssocUser(),
-                    VoxxApplication.SERVER_HOST, VoxxApplication.SERVER_PORT);
+            instance.setUMConnection(new UpdateMessageConnection(instance.getAssocUser(),
+                    VoxxApplication.SERVER_HOST, VoxxApplication.SERVER_PORT));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +82,7 @@ public class ChatController {
 
     public void startTask() {
         connectSupplemental();
-        updateMessageConnection.onUpdateMessage(msg -> {
+        instance.getUMConnection().onUpdateMessage(msg -> {
             System.out.println("Update message: " + msg);
             var key = msg.getString("update-message");
             var body = msg.getJSONObject("body");
@@ -109,7 +108,9 @@ public class ChatController {
                 }
             }
         });
-        Executors.newSingleThreadExecutor().execute(updateMessageConnection);
+        var executor = Executors.newSingleThreadExecutor();
+        executor.execute(instance.getUMConnection());
+        executor.shutdown();
     }
 
     public void addMessage(Message message) {
@@ -144,6 +145,7 @@ public class ChatController {
     public void onKeyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             var text = msgField.getText();
+            if (text.isEmpty() || text.isBlank()) return;
             var reqJson = new JSONObject();
             reqJson.put("request-id", "sm");
             reqJson.put("params", new JSONObject().put("message", text));

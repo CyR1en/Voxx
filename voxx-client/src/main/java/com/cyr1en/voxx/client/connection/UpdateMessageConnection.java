@@ -16,6 +16,7 @@ public class UpdateMessageConnection implements Runnable {
     private final BufferedReader reader;
     private final PrintWriter out;
     private Consumer<JSONObject> onUpdateMessage;
+    private boolean isRunning;
 
     public UpdateMessageConnection(User user, String host, int port) throws IOException {
         this.socket = new Socket(host, port);
@@ -25,6 +26,7 @@ public class UpdateMessageConnection implements Runnable {
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         onUpdateMessage = (s) -> {
         };
+        isRunning = true;
     }
 
     private void setConnection(String mainUser) {
@@ -47,18 +49,28 @@ public class UpdateMessageConnection implements Runnable {
         this.onUpdateMessage = onUpdateMessage;
     }
 
+    public void closeConnection() {
+        System.out.println("Closing UM Connection");
+        isRunning = false;
+        try {
+            this.out.close();
+            this.reader.close();
+            this.socket.close();
+        } catch (IOException e) {
+            System.out.println("Could not properly close connection!");
+        }
+    }
+
     @Override
     public void run() {
         try {
             String line = null;
             System.out.println("TASK CALL");
-            while ((line = getReader().readLine()) != null) {
+            while ((line = getReader().readLine()) != null && isRunning) {
                 if (!isConnected()) continue;
                 var json = new JSONObject(line);
                 onUpdateMessage.accept(json);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException ignore) {}
     }
 }

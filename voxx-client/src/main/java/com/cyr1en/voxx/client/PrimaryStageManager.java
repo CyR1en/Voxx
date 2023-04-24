@@ -22,6 +22,8 @@ public class PrimaryStageManager {
         primaryStage.setOnCloseRequest(e -> {
             if (Objects.nonNull(this.instance.getClient()))
                 this.instance.getClient().closeConnection();
+            if (Objects.nonNull(this.instance.getUMConnection()))
+                this.instance.getUMConnection().closeConnection();
             Platform.exit();
             System.exit(0);
         });

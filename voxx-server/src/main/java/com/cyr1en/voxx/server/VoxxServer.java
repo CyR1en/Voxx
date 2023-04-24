@@ -57,7 +57,8 @@ public class VoxxServer extends Server implements EventBus.Listener {
 
     @EventListener
     public void onClientDisconnect(ClientDisconnectEvent event) {
-        Server.LOGGER.info("[Vox] Client ({}) disconnected", event.clientConnection().getRemoteAddress());
+        Server.LOGGER.info("[Vox] Client ({}) disconnected {}", event.clientConnection().getRemoteAddress(),
+                event.clientConnection().isSupplementalConnection() ? "[S]" : "");
         if (event.clientConnection().getAssocUser() == null) return;
         var user = event.clientConnection().getAssocUser();
         userRegistry.userMap.remove(user.getUsername());

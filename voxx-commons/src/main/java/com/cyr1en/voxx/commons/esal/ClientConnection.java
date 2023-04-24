@@ -108,7 +108,8 @@ public class ClientConnection implements Runnable {
 
         try {
             String inLine;
-            while ((inLine = in.readLine()) != null) eventBus.post(new ClientMessageEvent(this, inLine));
+            while ((inLine = in.readLine()) != null && isConnected())
+                eventBus.post(new ClientMessageEvent(this, inLine));
             close();
         } catch (IOException e) {
             Server.LOGGER.error(e.getMessage());

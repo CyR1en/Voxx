@@ -1,6 +1,7 @@
 package com.cyr1en.voxx.client;
 
 import com.cyr1en.voxx.client.connection.ReqResClientConnection;
+import com.cyr1en.voxx.client.connection.UpdateMessageConnection;
 import com.cyr1en.voxx.client.controllers.LoginController;
 import com.cyr1en.voxx.commons.model.User;
 import javafx.application.Application;
@@ -17,6 +18,7 @@ public class VoxxApplication extends Application {
     public static Pattern HOST_PORT_REGEX = Pattern.compile("(.*):(\\d+)");
 
     private ReqResClientConnection client;
+    private UpdateMessageConnection uMConnection;
     private PrimaryStageManager stageManager;
     private User assocUser;
 
@@ -39,6 +41,10 @@ public class VoxxApplication extends Application {
         return client;
     }
 
+    public UpdateMessageConnection getUMConnection() {
+        return uMConnection;
+    }
+
     public User getAssocUser() {
         return this.assocUser;
     }
@@ -49,6 +55,10 @@ public class VoxxApplication extends Application {
 
     public void setClient(ReqResClientConnection client) {
         this.client = client;
+    }
+
+    public void setUMConnection(UpdateMessageConnection uMConnection) {
+        this.uMConnection = uMConnection;
     }
 
     public static void changeHost(String str) {

@@ -19,12 +19,8 @@ public class ProtocolHandler {
 
     public ProtocolHandler(VoxxServer serverInstance) {
         this.serverInstance = serverInstance;
-        registerProtocols();
     }
 
-    private void registerProtocols() {
-
-    }
 
     public void handOnMessage(ClientMessageEvent event) {
         var req = RequestParser.parse(event, serverInstance);
@@ -32,22 +28,15 @@ public class ProtocolHandler {
             req.onRequest(event);
     }
 
-    public void handleOnConnect(ClientConnectEvent event) {
-
-    }
-
-    public void handleOnDisconnect(ClientDisconnectEvent event) {
-
-    }
-
     public static class RequestParser {
 
         public static Request parse(ClientMessageEvent event, VoxxServer server) {
             JSONObject json;
             try {
+                Server.LOGGER.info("Parsing: '{}'", event.getMessage());
                 json = new JSONObject(event.getMessage());
             } catch (JSONException e) {
-                Server.LOGGER.error("Unable to parse message json from message");
+                Server.LOGGER.error("Unable to parse message json from message: " + e.getMessage());
                 return null;
             }
             var reqID = json.getString("request-id");

@@ -99,7 +99,7 @@ public class LoginController {
 
     @FXML
     protected void onStatusCircleClick() {
-        if(!this.voxxApplication.isConnected())
+        if (!this.voxxApplication.isConnected())
             connectToServer(false);
     }
 

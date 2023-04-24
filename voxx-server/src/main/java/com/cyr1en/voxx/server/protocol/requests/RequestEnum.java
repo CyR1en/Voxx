@@ -8,7 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 public enum RequestEnum {
     REGISTER_USER("ru", RegisterUser.class),
     SEND_MESSAGE("sm", SendMessage.class),
-    USER_LIST("ul", UserList.class);
+    USER_LIST("ul", UserList.class),
+    SET_UPDATE_CONNECTION("su", SetUpdateConnection.class);
 
     private final String id;
     private final Class<? extends Request> reqClass;

@@ -48,12 +48,11 @@ public class Server implements Runnable {
 
             while (true) {
                 var clientSocket = serverSocket.accept();
-                LOGGER.info("New client accepted " + clientSocket.getLocalAddress().getHostAddress());
                 var executorService = Executors.newSingleThreadExecutor();
                 var clientConnection = new ClientConnection(clientSocket, eventBus);
-                clientConnections.add(clientConnection);
+                LOGGER.info(String.format("New client (%s)", clientConnection.getRemoteAddress()));
+                eventBus.post(new ClientConnectEvent(clientConnection), () -> clientConnections.add(clientConnection));
                 executorService.execute(clientConnection);
-                eventBus.post(new ClientConnectEvent(clientConnection));
                 executors.add(executorService);
             }
         } catch (IOException e) {

@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class ClientConnection implements Runnable {
@@ -66,6 +65,10 @@ public class ClientConnection implements Runnable {
         return isRunning;
     }
 
+    public boolean isConnected() {
+        return clientSocket.isConnected();
+    }
+
     public void setSupplementalConnection(boolean b) {
         this.isSupplementalConnection = b;
     }
@@ -90,7 +93,7 @@ public class ClientConnection implements Runnable {
                 isRunning = false;
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Server.LOGGER.error("Could not properly close connection! " + e.getMessage());
         }
     }
 
@@ -108,7 +111,8 @@ public class ClientConnection implements Runnable {
             while ((inLine = in.readLine()) != null) eventBus.post(new ClientMessageEvent(this, inLine));
             close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Server.LOGGER.error(e.getMessage());
+            close();
         }
 
     }

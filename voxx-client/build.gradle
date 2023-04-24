@@ -1,3 +1,6 @@
+import org.gradle.internal.os.OperatingSystem
+
+
 plugins {
     id 'java'
     id 'application'
@@ -49,15 +52,19 @@ jlink {
     jpackage {
         imageName = 'Voxx'
         vendor = 'CyR1en'
-
-        resourceDir = file("$buildDir/resources")
-        icon = "${resourceDir}/main/Voxx.ico"
-
         installerName = 'Voxx-Installer'
+        resourceDir = file("$buildDir/resources")
         skipInstaller = project.hasProperty('skipInstaller') ?
                 project.getProperties().get('skipInstaller') : false
-        installerType = 'msi'
-        installerOptions = ['--win-menu', '--win-shortcut']
+
+        if (OperatingSystem.current().windows) {
+            icon = "${resourceDir}/main/Voxx.ico"
+            installerType = 'msi'
+            installerOptions = ['--win-menu', '--win-shortcut']
+        } else if (OperatingSystem.current().macOsX) {
+            icon = "${resourceDir}/main/Voxx.icns"
+            installerType = 'dmg'
+        }
     }
     forceMerge('log4j-api')
 }

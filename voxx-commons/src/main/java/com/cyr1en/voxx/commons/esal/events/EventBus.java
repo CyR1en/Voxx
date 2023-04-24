@@ -115,7 +115,7 @@ public class EventBus {
      * @param event event to post.
      * @param <T>   The type of the event.
      */
-    public <T> void post(T event) {
+    public <T> void post(T event, Runnable runAfter) {
         Class<?> eventType = event.getClass();
         var eventListeners = listenerMap.get(eventType);
         if (Objects.isNull(eventListeners)) return;
@@ -133,7 +133,21 @@ public class EventBus {
             });
             if (!isThreadPool) executor.shutdown();
         }
-        if (isThreadPool) executor.shutdown();
+        if (isThreadPool) {
+            executor.shutdown();
+            try {
+                var finished = executor.awaitTermination(1, TimeUnit.SECONDS);
+                if (finished)
+                    runAfter.run();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public <T> void post(T event) {
+        post(event, () -> {
+        });
     }
 
     /**

@@ -3,7 +3,6 @@ package com.cyr1en.voxx.server.protocol.requests;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.model.Message;
 import com.cyr1en.voxx.commons.model.UID;
-import com.cyr1en.voxx.commons.model.User;
 import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
 import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;
@@ -42,7 +41,7 @@ public class SendMessage implements Request {
                 .put("content", message.getContent()));
         messageJson.put("body", body);
 
-        server.broadcastWithExclusion(assocUser, messageJson);
+        server.broadcastWithExclusions(assocUser, messageJson);
     }
 
 }

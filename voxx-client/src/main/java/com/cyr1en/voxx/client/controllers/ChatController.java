@@ -44,7 +44,7 @@ public class ChatController {
 
     private VoxxApplication instance;
     private final User system;
-    private final UpdateMessageConnection updateMessageConnection;
+    private UpdateMessageConnection updateMessageConnection;
 
     public ChatController() throws IOException {
         this.userList = new ListView<>();
@@ -52,7 +52,6 @@ public class ChatController {
         this.system = new User(UID.Generator.generate(), "System");
         this.unameLabel = new Label();
         this.cBoxScrollPane = new ScrollPane();
-        this.updateMessageConnection = new UpdateMessageConnection(VoxxApplication.SERVER_HOST, VoxxApplication.SERVER_PORT);
     }
 
     public void initialize() {
@@ -73,7 +72,17 @@ public class ChatController {
         });
     }
 
+    private void connectSupplemental() {
+        try {
+            this.updateMessageConnection = new UpdateMessageConnection(instance.getAssocUser(),
+                    VoxxApplication.SERVER_HOST, VoxxApplication.SERVER_PORT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void startTask() {
+        connectSupplemental();
         updateMessageConnection.onUpdateMessage(msg -> {
             System.out.println("Update message: " + msg);
             var key = msg.getString("update-message");

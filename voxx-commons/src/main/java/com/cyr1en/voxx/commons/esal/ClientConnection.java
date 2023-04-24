@@ -34,8 +34,7 @@ public class ClientConnection implements Runnable {
             throw new RuntimeException(e);
         }
         isRunning = false;
-        this.remoteAddress = (((InetSocketAddress) clientSocket.getRemoteSocketAddress()).getAddress()).
-                toString().replace("/", "");
+        this.remoteAddress = clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort();
     }
 
     public void setAssocUser(@NotNull User user) {

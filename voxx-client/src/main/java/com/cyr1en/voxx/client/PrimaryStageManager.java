@@ -23,7 +23,6 @@ public class PrimaryStageManager {
             if (Objects.nonNull(this.instance.getClient()))
                 this.instance.getClient().closeConnection();
             Platform.exit();
-            System.exit(0);
         });
     }
 

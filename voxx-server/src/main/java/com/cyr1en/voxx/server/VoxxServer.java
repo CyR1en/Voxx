@@ -13,8 +13,8 @@ import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
 import com.cyr1en.voxx.server.protocol.ProtocolHandler;
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 
 public class VoxxServer extends Server implements EventBus.Listener {
 
@@ -23,37 +23,33 @@ public class VoxxServer extends Server implements EventBus.Listener {
 
     public VoxxServer() {
         super(8008, 500);
+        getEventBus().setExecutorServiceSupplier(Executors::newCachedThreadPool);
         getEventBus().subscribeListeners(this);
         this.userRegistry = new UserRegistry();
         this.protocolHandler = new ProtocolHandler(this);
         run();
     }
 
-    public synchronized void broadcastWithExclusion(User user, JSONObject object) {
+    public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {
         for (ClientConnection cc : getClientConnections()) {
-            var userAssociated = Objects.nonNull(cc.getAssocUser());
-            if (!userAssociated || user.getUID().equals(cc.getAssocUser().getUID())
-                    || !cc.isSupplementalConnection()) continue;
-            LOGGER.info("Broadcasting to: " + cc.getRemoteAddress());
-            cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
+            if (cc.getAssocUser() == null) continue;
+            if (!cc.getAssocUser().equals(excludedUser) && cc.isSupplementalConnection()) {
+                LOGGER.info("Broadcasting to: " + cc.getRemoteAddress());
+                cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
+            }
         }
     }
 
     @EventListener
     public void onClientConnect(ClientConnectEvent event) {
         Server.LOGGER.info("[Vox] New client ({}) connected", event.clientConnection().getRemoteAddress());
-        getClientConnections().forEach(cc -> {
-            if (cc.getRemoteAddress().equals(event.clientConnection().getRemoteAddress()))
-                if (cc.getAssocUser() != null) {
-                    event.clientConnection().setAssocUser(cc.getAssocUser());
-                    event.clientConnection().setSupplementalConnection(true);
-                }
-        });
-        protocolHandler.handleOnConnect(event);
     }
 
     @EventListener
     public void onClientMessage(ClientMessageEvent event) {
+        // Ignore if this is a supplemental connection
+        if (event.getClientConnection().isSupplementalConnection()) return;
+
         var msg = event.getMessage();
         Server.LOGGER.info("[Vox] Client said: " + msg);
         protocolHandler.handOnMessage(event);
@@ -62,7 +58,6 @@ public class VoxxServer extends Server implements EventBus.Listener {
     @EventListener
     public void onClientDisconnect(ClientDisconnectEvent event) {
         Server.LOGGER.info("[Vox] Client ({}) disconnected", event.clientConnection().getRemoteAddress());
-        protocolHandler.handleOnDisconnect(event);
         if (event.clientConnection().getAssocUser() == null) return;
         var user = event.clientConnection().getAssocUser();
         userRegistry.userMap.remove(user.getUsername());
@@ -71,7 +66,7 @@ public class VoxxServer extends Server implements EventBus.Listener {
         var body = new JSONObject().put("user", new JSONObject().put("uid", user.getUID().asLong())
                 .put("uname", user.getUsername()));
         responseJson.put("body", body);
-        broadcastWithExclusion(event.clientConnection().getAssocUser(), responseJson);
+        broadcastWithExclusions(user, responseJson);
     }
 
     public UserRegistry getUserRegistry() {

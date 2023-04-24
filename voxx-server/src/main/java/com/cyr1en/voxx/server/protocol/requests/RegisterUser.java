@@ -65,7 +65,7 @@ public class RegisterUser implements Request {
             var body = new JSONObject().put("user", new JSONObject().put("uid", user.getUID().asLong())
                     .put("uname", user.getUsername()));
             responseJson.put("body", body);
-            voxx.broadcastWithExclusion(user, responseJson);
+            voxx.broadcastWithExclusions(user, responseJson);
         }
     }
 

@@ -14,6 +14,7 @@ public class ReqResClientConnection {
 
     public ReqResClientConnection(String host, int port) throws IOException {
         this.socket = new Socket(host, port);
+        socket.setKeepAlive(true);
         this.out = new PrintWriter(socket.getOutputStream(), true);
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }

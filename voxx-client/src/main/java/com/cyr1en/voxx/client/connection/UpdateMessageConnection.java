@@ -19,6 +19,7 @@ public class UpdateMessageConnection implements Runnable {
 
     public UpdateMessageConnection(User user, String host, int port) throws IOException {
         this.socket = new Socket(host, port);
+        socket.setKeepAlive(true);
         this.out = new PrintWriter(this.socket.getOutputStream(), true);
         setConnection(user.getUsername());
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));

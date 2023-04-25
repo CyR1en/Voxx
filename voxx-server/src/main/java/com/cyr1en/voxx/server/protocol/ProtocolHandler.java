@@ -1,8 +1,6 @@
 package com.cyr1en.voxx.server.protocol;
 
 import com.cyr1en.voxx.commons.esal.Server;
-import com.cyr1en.voxx.commons.esal.events.server.ClientConnectEvent;
-import com.cyr1en.voxx.commons.esal.events.server.ClientDisconnectEvent;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;
@@ -15,12 +13,11 @@ import java.util.Objects;
 
 public class ProtocolHandler {
 
-    private VoxxServer serverInstance;
+    private final VoxxServer serverInstance;
 
     public ProtocolHandler(VoxxServer serverInstance) {
         this.serverInstance = serverInstance;
     }
-
 
     public void handOnMessage(ClientMessageEvent event) {
         var req = RequestParser.parse(event, serverInstance);
@@ -29,14 +26,14 @@ public class ProtocolHandler {
     }
 
     public static class RequestParser {
-
         public static Request parse(ClientMessageEvent event, VoxxServer server) {
             JSONObject json;
             try {
                 Server.LOGGER.info("Parsing: '{}'", event.getMessage());
                 json = new JSONObject(event.getMessage());
             } catch (JSONException e) {
-                Server.LOGGER.error("Unable to parse message json from message: " + e.getMessage());
+                Server.LOGGER.info("Non-Json request from ({})",
+                        event.getClientConnection().getRemoteAddress());
                 return null;
             }
             var reqID = json.getString("request-id");
@@ -47,9 +44,8 @@ public class ProtocolHandler {
                 return req.construct(server);
             } catch (Exception e) {
                 Server.LOGGER.error("Unable to parse message json from message");
+                return null;
             }
-            return null;
         }
-
     }
 }

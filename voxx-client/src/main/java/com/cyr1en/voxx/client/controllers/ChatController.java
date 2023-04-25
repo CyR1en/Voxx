@@ -1,15 +1,12 @@
 package com.cyr1en.voxx.client.controllers;
 
 import com.cyr1en.voxx.client.VoxxApplication;
-import com.cyr1en.voxx.client.connection.ReqResClientConnection;
 import com.cyr1en.voxx.client.connection.UpdateMessageConnection;
 import com.cyr1en.voxx.commons.model.Message;
 import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,13 +14,18 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
+
 
 public class ChatController {
 
@@ -131,14 +133,45 @@ public class ChatController {
         tsLabel.setTextFill(Color.valueOf("#949494"));
         infoHbox.getChildren().addAll(uNameLabel, tsLabel);
 
-        var textArea = new TextArea(message.getContent());
+        var textArea = new TextArea();
         textArea.getStylesheets().add("/css/chatbox.css");
         textArea.setEditable(false);
         textArea.setWrapText(true);
-        textArea.setPrefHeight((double) textArea.getText().length() / 30 * 21);
+        textArea.setText(message.getContent());
+        fitTextArea(textArea);
 
         vbox.getChildren().addAll(infoHbox, textArea);
         chatBox.getChildren().add(vbox);
+
+    }
+
+    private void fitTextArea(TextArea textArea) {
+
+        Platform.runLater(() -> {
+            Text tempText = new Text(textArea.getText());
+            final var textAreaWidth  = 230;
+            final var lineHeight = 25;
+            System.out.println("=========================");
+            System.out.println("lineHeight : " + lineHeight );
+
+            var lineWidth = tempText.getLayoutBounds().getWidth();
+            System.out.println("lineWidth : " + lineWidth );
+
+            var lineCount = Math.ceil((lineWidth / textAreaWidth));
+            System.out.println("Line count: " + lineCount);
+
+            var paddingCount = 8 * lineCount;
+            System.out.println("paddingCount: " + paddingCount);
+
+            var lineSpace = 5 * (lineCount - 1);
+            System.out.println("Line spacing: " + lineSpace);
+
+            var textAreaH = lineHeight * lineCount - lineSpace ; //+ paddingCount + lineSpace;
+           // textAreaH = tempText.boundsInParentProperty().get().getMaxY();
+            System.out.println("textAreaH: " + textAreaH);
+            textArea.setMinHeight(textAreaH);
+            textArea.setMaxHeight(textAreaH);
+        });
     }
 
     @FXML
@@ -167,10 +200,12 @@ public class ChatController {
 
     public void addUserList(String uName) {
         userList.getItems().add(uName);
+        FXCollections.sort(userList.getItems());
     }
 
     public void removeUserList(String uName) {
         userList.getItems().remove(uName);
+        FXCollections.sort(userList.getItems());
     }
 
     public void setVoxxApplication(VoxxApplication instance) {

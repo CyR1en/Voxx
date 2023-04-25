@@ -6,10 +6,9 @@ import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.json.JSONObject;
@@ -54,7 +53,8 @@ public class LoginController {
 
     public void initialize() {
         warningLabel.setText("");
-        connectToServer(true);
+        Tooltip.install(connectionStatus, new Tooltip("Right click to change server, left click to try reconnecting."));
+        connectToServer(true, 2);
     }
 
     public void setVoxxApplication(VoxxApplication voxxApplication) {
@@ -98,16 +98,25 @@ public class LoginController {
     }
 
     @FXML
-    protected void onStatusCircleClick() {
-        if (!this.voxxApplication.isConnected())
+    protected void onStatusCircleClick(MouseEvent event) {
+        //check if right click
+        if (this.voxxApplication.isConnected()) return;
+
+        if (event.getButton() == MouseButton.SECONDARY)
             connectToServer(false);
+        else if (event.getButton() == MouseButton.PRIMARY)
+            connectToServer(true);
     }
 
-    private void connectToServer(boolean isInitial) {
+    private void connectToServer(boolean promptServer) {
+        connectToServer(promptServer, 5);
+    }
+
+    private void connectToServer(boolean promptServer, int tries) {
         if (isAttemptingConnect) return;
         isAttemptingConnect = true;
 
-        if (!isInitial) {
+        if (!promptServer) {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Set server address");
             dialog.setHeaderText(null);
@@ -119,7 +128,7 @@ public class LoginController {
         }
 
         var exec = Executors.newSingleThreadScheduledExecutor();
-        var task = new ConnectionTask(2000, 5);
+        var task = new ConnectionTask(2000, tries);
         task.setOnScheduled(e -> {
             if (voxxApplication.isConnected()) {
                 task.cancel();

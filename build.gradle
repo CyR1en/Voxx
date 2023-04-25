@@ -3,7 +3,7 @@ subprojects {
     apply plugin: 'maven-publish'
 
     group 'com.cyr1en'
-    version = "1.0.0"
+    version = "1.0-SNAPSHOT"
 
     sourceCompatibility = '17'
     targetCompatibility = '17'
@@ -12,20 +12,22 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    publishing {
-        repositories {
-            maven {
-                name = "Kakuno"
-                url = uri("https://repo.cyr1en.com/snapshots")
-                credentials {
-                    username = System.getenv("KAKUNO_USER")
-                    password = System.getenv("KAKUNO_TOKEN")
+    if (!project.name.equals('voxx-client')) {
+        publishing {
+            repositories {
+                maven {
+                    name = "Kakuno"
+                    url = uri("https://repo.cyr1en.com/snapshots")
+                    credentials {
+                        username = System.getenv("KAKUNO_USER")
+                        password = System.getenv("KAKUNO_TOKEN")
+                    }
                 }
             }
-        }
-        publications {
-            gpr(MavenPublication) {
-                from(components.java)
+            publications {
+                gpr(MavenPublication) {
+                    from(components.java)
+                }
             }
         }
     }

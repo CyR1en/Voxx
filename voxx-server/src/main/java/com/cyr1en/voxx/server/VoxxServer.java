@@ -31,10 +31,10 @@ public class VoxxServer extends Server implements EventBus.Listener {
     }
 
     public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {
+        LOGGER.info("Broadcasting to: {}", object.toString());
         for (ClientConnection cc : getClientConnections()) {
             if (cc.getAssocUser() == null) continue;
             if (!cc.getAssocUser().equals(excludedUser) && cc.isSupplementalConnection()) {
-                LOGGER.info("Broadcasting to: " + cc.getRemoteAddress());
                 cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
             }
         }

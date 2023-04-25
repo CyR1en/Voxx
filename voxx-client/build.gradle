@@ -52,6 +52,7 @@ jlink {
     jpackage {
         imageName = 'Voxx'
         vendor = 'CyR1en'
+        version = '1.0.0'
         installerName = 'Voxx-Installer'
         resourceDir = file("$buildDir/resources")
         skipInstaller = project.hasProperty('skipInstaller') ?

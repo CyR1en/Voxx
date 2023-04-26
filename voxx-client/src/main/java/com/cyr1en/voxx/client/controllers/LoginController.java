@@ -44,7 +44,6 @@ public class LoginController {
     @FXML
     private Circle connectionStatus;
 
-
     public LoginController() {
         warningLabel = new Label();
         connectionStatus = new Circle();
@@ -109,23 +108,31 @@ public class LoginController {
     }
 
     private void connectToServer(boolean promptServer) {
-        connectToServer(promptServer, 5);
+        connectToServer(promptServer, 3);
+    }
+
+    private Optional<String> promptServer() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Set server address");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Host and port:");
+        dialog.getEditor().setPromptText("server_address:port");
+        Platform.runLater(() -> {
+            dialog.getDialogPane().requestFocus();
+            var stageManager = voxxApplication.getStageManager();
+            var stageCenter = stageManager.getStageCenter();
+            dialog.setX(stageCenter.getX() - (dialog.getWidth() / 2));
+            dialog.setY(stageCenter.getY() - (dialog.getHeight() / 2));
+        });
+        return dialog.showAndWait();
     }
 
     private void connectToServer(boolean promptServer, int tries) {
         if (isAttemptingConnect) return;
         isAttemptingConnect = true;
 
-        if (!promptServer) {
-            TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("Set server address");
-            dialog.setHeaderText(null);
-            dialog.setContentText("Host and port:");
-            dialog.getEditor().setPromptText("server_address:port");
-            Platform.runLater(() -> dialog.getDialogPane().requestFocus());
-            Optional<String> result = dialog.showAndWait();
-            result.ifPresent(VoxxApplication::changeHost);
-        }
+        if (!promptServer)
+            promptServer().ifPresent(VoxxApplication::changeServerAddr);
 
         var exec = Executors.newSingleThreadScheduledExecutor();
         var task = new ConnectionTask(2000, tries);

@@ -24,19 +24,15 @@ jobs:
       run: echo $JAVA_HOME
     - name: Verify Gradle Wrapper
       uses: gradle/wrapper-validation-action@v1
-    - name: Execute build
-      run: ./gradlew --info --stacktrace build
-    - name: Execute jlink
-      run: ./gradlew --info --stacktrace jlink
     - name: Execute jpackage
-      run: ./gradlew --info --stacktrace jpackage
+      run: ./gradlew clean :voxx-client:jpackage
     - name: Upload DMG as an artifact
       uses: actions/upload-artifact@v2
       with:
         name: Voxx-${{ matrix.os }}
-        path: build/jpackage/*.dmg
+        path: voxx-client/build/jpackage/*.dmg
     - name: Upload MSI as an artifact
       uses: actions/upload-artifact@v2
       with:
         name: Voxx-${{ matrix.os }}
-        path: build/jpackage/*.msi        
+        path: voxx-client/build/jpackage/*.msi        

@@ -26,13 +26,20 @@ jobs:
       uses: gradle/wrapper-validation-action@v1
     - name: Execute jpackage
       run: ./gradlew clean :voxx-client:jpackage
-    - name: Upload DMG as an artifact
-      uses: actions/upload-artifact@v2
+    - name: Get Previous tag
+      id: previoustag
+      uses: "WyriHaximus/github-action-get-previous-tag@v1"
       with:
-        name: Voxx-${{ matrix.os }}
-        path: voxx-client/build/jpackage/*.dmg
-    - name: Upload MSI as an artifact
-      uses: actions/upload-artifact@v2
+        fallback: 1.0.0
+    - name: Installer paths
+      uses: haya14busa/action-cond@v1
+      id: getInstaller
       with:
-        name: Voxx-${{ matrix.os }}
-        path: voxx-client/build/jpackage/*.msi        
+        cond: runner.os == 'Windows'
+        if_true: 'voxx-client/build/jpackage/*.msi' 
+        if_false: 'voxx-client/build/jpackage/*.dmg'
+    - name: Upload Release Asset
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run:
+        gh release upload ${{ steps.previoustag.outputs.tag }} ${{ stops.getInstaller.outputs.value }}

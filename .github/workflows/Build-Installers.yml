@@ -42,4 +42,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run:
-        gh release upload ${{ steps.previoustag.outputs.tag }} ${{ stops.getInstaller.outputs.value }}
+        gh release upload ${{ steps.previoustag.outputs.tag }} ${{ steps.getInstaller.outputs.value }}

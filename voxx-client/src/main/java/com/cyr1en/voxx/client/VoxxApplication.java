@@ -13,9 +13,10 @@ import java.util.regex.Pattern;
 
 public class VoxxApplication extends Application {
 
-    public static String SERVER_HOST = "localhost";
-    public static int SERVER_PORT = 8008;
     public static Pattern HOST_PORT_REGEX = Pattern.compile("(.*):(\\d+)");
+
+    public static String serverHost = "localhost";
+    public static int serverPort = 8008;
 
     private ReqResClientConnection client;
     private UpdateMessageConnection uMConnection;
@@ -64,9 +65,9 @@ public class VoxxApplication extends Application {
     public static void changeHost(String str) {
         var matcher = HOST_PORT_REGEX.matcher(str);
         if (matcher.matches()) {
-            SERVER_HOST = matcher.group(1);
-            SERVER_PORT = Integer.parseInt(matcher.group(2));
-            System.out.println("Changed host to " + SERVER_HOST + ":" + SERVER_PORT);
+            serverHost = matcher.group(1);
+            serverPort = Integer.parseInt(matcher.group(2));
+            System.out.println("Changed host to " + serverHost + ":" + serverPort);
         }
     }
 

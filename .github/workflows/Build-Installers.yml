@@ -35,11 +35,11 @@ jobs:
       uses: haya14busa/action-cond@v1
       id: getInstaller
       with:
-        cond: runner.os == 'Windows'
+        cond: ${{ contains(runner.os, 'Windows') }}
         if_true: voxx-client/build/jpackage/*.msi 
         if_false: voxx-client/build/jpackage/*.dmg
     - name: Upload Release Asset
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       run:
         gh release upload ${{ steps.previoustag.outputs.tag }} ${{ steps.getInstaller.outputs.value }}

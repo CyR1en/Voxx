@@ -2,6 +2,7 @@ package com.cyr1en.voxx.client;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -29,8 +30,23 @@ public class PrimaryStageManager {
         });
     }
 
+    public double getStageX() {
+        return primaryStage.getX();
+    }
+
+    public double getStageY() {
+        return primaryStage.getY();
+    }
+
+    public Point2D getStageCenter() {
+        return new Point2D(getStageX() + (primaryStage.getWidth() / 2)
+                , getStageY() + (primaryStage.getHeight() / 2));
+    }
+
     @SuppressWarnings("unchecked")
     public <T> void setScene(String fxmlFile, Consumer<T> controllerConsumer) throws IOException {
+        var center = getStageCenter();
+        System.out.println("Center: " + center);
         primaryStage.hide();
         primaryStage.setResizable(true);
         var fxmlLoader = new FXMLLoader(VoxxApplication.class.getResource(fxmlFile));
@@ -40,5 +56,7 @@ public class PrimaryStageManager {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
+        primaryStage.setX(center.getX() - (primaryStage.getWidth() / 2));
+        primaryStage.setY(center.getY() - (primaryStage.getHeight() / 2));
     }
 }

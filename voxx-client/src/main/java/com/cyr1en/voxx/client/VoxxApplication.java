@@ -62,7 +62,7 @@ public class VoxxApplication extends Application {
         this.uMConnection = uMConnection;
     }
 
-    public static void changeHost(String str) {
+    public static void changeServerAddr(String str) {
         var matcher = HOST_PORT_REGEX.matcher(str);
         if (matcher.matches()) {
             serverHost = matcher.group(1);

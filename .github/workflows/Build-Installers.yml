@@ -36,7 +36,7 @@ jobs:
       id: getInstaller
       with:
         cond: ${{ contains(runner.os, 'Windows') }}
-        if_true: voxx-client/build/jpackage/*.msi 
+        if_true: voxx-client/build/jpackage/Voxx-Installer-${{ steps.previoustag.outputs.tag }}.msi 
         if_false: voxx-client/build/jpackage/*.dmg
     - name: Upload Release Asset
       env:

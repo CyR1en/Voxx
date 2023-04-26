@@ -13,6 +13,7 @@ import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
 import com.cyr1en.voxx.server.protocol.ProtocolHandler;
 import org.json.JSONObject;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
@@ -31,13 +32,23 @@ public class VoxxServer extends Server implements EventBus.Listener {
     }
 
     public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {
-        LOGGER.info("Broadcasting to: {}", object.toString());
+        LOGGER.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        LOGGER.info("Broadcasting {}", object.getString("update-message"));
         for (ClientConnection cc : getClientConnections()) {
+            if (Objects.isNull(cc)) continue;
+            LOGGER.info("----------");
+            LOGGER.info("Current client: {}", cc.getRemoteAddress());
             if (cc.getAssocUser() == null) continue;
+            LOGGER.info("Current user-name: {}", cc.getAssocUser().getUsername());
             if (!cc.getAssocUser().equals(excludedUser) && cc.isSupplementalConnection()) {
+                LOGGER.info("Broadcasting to this user");
                 cc.sendMessage(ProtocolUtil.flattenJSONObject(object));
+            } else {
+                LOGGER.info("Not broadcasting to this user");
             }
         }
+        LOGGER.info("----------");
+        LOGGER.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
     }
 
     @EventListener
@@ -57,9 +68,11 @@ public class VoxxServer extends Server implements EventBus.Listener {
 
     @EventListener
     public void onClientDisconnect(ClientDisconnectEvent event) {
+        var isSupplementalClient = event.clientConnection().isSupplementalConnection();
         Server.LOGGER.info("[Vox] Client ({}) disconnected {}", event.clientConnection().getRemoteAddress(),
-                event.clientConnection().isSupplementalConnection() ? "[S]" : "");
-        if (event.clientConnection().getAssocUser() == null) return;
+                isSupplementalClient ? "[S]" : "");
+        if (isSupplementalClient || event.clientConnection().getAssocUser() == null) return;
+
         var user = event.clientConnection().getAssocUser();
         userRegistry.userMap.remove(user.getUsername());
         var responseJson = new JSONObject();

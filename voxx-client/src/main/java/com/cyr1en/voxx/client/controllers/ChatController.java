@@ -14,11 +14,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.json.JSONObject;
@@ -76,7 +73,7 @@ public class ChatController {
     private void connectSupplemental() {
         try {
             instance.setUMConnection(new UpdateMessageConnection(instance.getAssocUser(),
-                    VoxxApplication.SERVER_HOST, VoxxApplication.SERVER_PORT));
+                    VoxxApplication.serverHost, VoxxApplication.serverPort));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,35 +81,37 @@ public class ChatController {
 
     public void startTask() {
         connectSupplemental();
-        instance.getUMConnection().onUpdateMessage(msg -> {
-            System.out.println("Update message: " + msg);
-            var key = msg.getString("update-message");
-            var body = msg.getJSONObject("body");
-            switch (key) {
-                case "nu" -> {
-                    System.out.println("Adding user");
-                    var name = body.getJSONObject("user").getString("uname");
-                    Platform.runLater(() -> addUserList(name));
-                }
-                case "nm" -> {
-                    System.out.println("Adding message");
-                    var senderJson = body.getJSONObject("sender");
-                    var messageJson = body.getJSONObject("message");
-                    var sender = new User(UID.of(senderJson.getLong("uid")), senderJson.getString("uname"));
-                    var message = new Message(sender, messageJson.getString("content"),
-                            UID.of(messageJson.getLong("uid")));
-                    Platform.runLater(() -> addMessage(message));
-                }
-                case "ud" -> {
-                    var name = body.getJSONObject("user").getString("uname");
-                    System.out.println("Removing user " + name);
-                    Platform.runLater(() -> removeUserList(name));
-                }
-            }
-        });
+        instance.getUMConnection().onUpdateMessage(this::handleUM);
         var executor = Executors.newSingleThreadExecutor();
         executor.execute(instance.getUMConnection());
         executor.shutdown();
+    }
+
+    private void handleUM(JSONObject msg) {
+        System.out.println("Update message: " + msg);
+        var key = msg.getString("update-message");
+        var body = msg.getJSONObject("body");
+        switch (key) {
+            case "nu" -> {
+                System.out.println("Adding user");
+                var name = body.getJSONObject("user").getString("uname");
+                Platform.runLater(() -> addUserList(name));
+            }
+            case "nm" -> {
+                System.out.println("Adding message");
+                var senderJson = body.getJSONObject("sender");
+                var messageJson = body.getJSONObject("message");
+                var sender = new User(UID.of(senderJson.getLong("uid")), senderJson.getString("uname"));
+                var message = new Message(sender, messageJson.getString("content"),
+                        UID.of(messageJson.getLong("uid")));
+                Platform.runLater(() -> addMessage(message));
+            }
+            case "ud" -> {
+                var name = body.getJSONObject("user").getString("uname");
+                System.out.println("Removing user " + name);
+                Platform.runLater(() -> removeUserList(name));
+            }
+        }
     }
 
     public void addMessage(Message message) {
@@ -146,29 +145,17 @@ public class ChatController {
     }
 
     private void fitTextArea(TextArea textArea) {
-
         Platform.runLater(() -> {
             Text tempText = new Text(textArea.getText());
-            final var textAreaWidth  = 230;
+            final var textAreaWidth = 230;
             final var lineHeight = 25;
-            System.out.println("=========================");
-            System.out.println("lineHeight : " + lineHeight );
 
             var lineWidth = tempText.getLayoutBounds().getWidth();
-            System.out.println("lineWidth : " + lineWidth );
-
             var lineCount = Math.ceil((lineWidth / textAreaWidth));
-            System.out.println("Line count: " + lineCount);
-
-            var paddingCount = 8 * lineCount;
-            System.out.println("paddingCount: " + paddingCount);
-
             var lineSpace = 5 * (lineCount - 1);
-            System.out.println("Line spacing: " + lineSpace);
 
-            var textAreaH = lineHeight * lineCount - lineSpace ; //+ paddingCount + lineSpace;
-           // textAreaH = tempText.boundsInParentProperty().get().getMaxY();
-            System.out.println("textAreaH: " + textAreaH);
+            var textAreaH = lineHeight * lineCount - lineSpace;
+
             textArea.setMinHeight(textAreaH);
             textArea.setMaxHeight(textAreaH);
         });

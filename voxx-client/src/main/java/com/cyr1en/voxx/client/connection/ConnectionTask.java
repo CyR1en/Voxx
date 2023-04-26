@@ -5,8 +5,8 @@ import javafx.concurrent.Task;
 import java.io.IOException;
 import java.util.Objects;
 
-import static com.cyr1en.voxx.client.VoxxApplication.SERVER_HOST;
-import static com.cyr1en.voxx.client.VoxxApplication.SERVER_PORT;
+import static com.cyr1en.voxx.client.VoxxApplication.serverHost;
+import static com.cyr1en.voxx.client.VoxxApplication.serverPort;
 
 public class ConnectionTask extends Task<ReqResClientConnection> {
 
@@ -31,7 +31,7 @@ public class ConnectionTask extends Task<ReqResClientConnection> {
             if ((System.currentTimeMillis() - last) < interval) continue;
             System.out.println("Trying to connect to server...");
             try {
-                client = new ReqResClientConnection(SERVER_HOST, SERVER_PORT);
+                client = new ReqResClientConnection(serverHost, serverPort);
             } catch (IOException e) {
                 System.err.println("Could not connect to server!");
             }

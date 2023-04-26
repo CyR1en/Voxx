@@ -36,6 +36,8 @@ public class Server implements Runnable {
         return clientConnections;
     }
 
+
+
     @Override
     public void run() {
         ServerSocket serverSocket = null;
@@ -49,7 +51,7 @@ public class Server implements Runnable {
             while (true) {
                 var clientSocket = serverSocket.accept();
                 var executorService = Executors.newSingleThreadExecutor();
-                var clientConnection = new ClientConnection(clientSocket, eventBus);
+                var clientConnection = new ClientConnection(clientSocket, this);
                 LOGGER.info(String.format("New client (%s)", clientConnection.getRemoteAddress()));
                 eventBus.post(new ClientConnectEvent(clientConnection), () -> clientConnections.add(clientConnection));
                 executorService.execute(clientConnection);

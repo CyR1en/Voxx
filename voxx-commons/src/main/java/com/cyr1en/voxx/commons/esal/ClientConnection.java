@@ -20,11 +20,14 @@ public class ClientConnection implements Runnable {
     private User assocUser;
     private boolean isSupplementalConnection;
 
+    private final Server serverInstance;
     private final String remoteAddress;
 
-    public ClientConnection(Socket clientSocket, EventBus eventBus) {
+    public ClientConnection(Socket clientSocket, Server serverInstance) {
         this.clientSocket = clientSocket;
-        this.eventBus = eventBus;
+        this.eventBus = serverInstance.getEventBus();
+        this.serverInstance = serverInstance;
+
         isSupplementalConnection = false;
         try {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -88,6 +91,7 @@ public class ClientConnection implements Runnable {
                 in.close();
                 out.close();
                 clientSocket.close();
+                serverInstance.getClientConnections().remove(this);
                 eventBus.post(new ClientDisconnectEvent(this));
                 isRunning = false;
             }

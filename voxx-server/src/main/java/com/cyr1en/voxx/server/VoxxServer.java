@@ -59,7 +59,8 @@ public class VoxxServer extends Server implements EventBus.Listener {
     @EventListener
     public void onClientMessage(ClientMessageEvent event) {
         // Ignore if this is a supplemental connection
-        if (event.getClientConnection().isSupplementalConnection()) return;
+        var isPing = event.getMessage().contains("{\"request-id\": \"ping\"}");
+        if (event.getClientConnection().isSupplementalConnection() && !isPing) return;
 
         var msg = event.getMessage();
         Server.LOGGER.info("[Vox] Client said: " + msg);

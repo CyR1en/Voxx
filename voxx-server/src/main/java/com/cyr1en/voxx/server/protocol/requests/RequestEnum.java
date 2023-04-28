@@ -6,6 +6,7 @@ import com.cyr1en.voxx.server.VoxxServer;
 import java.lang.reflect.InvocationTargetException;
 
 public enum RequestEnum {
+    PING("ping", Ping.class),
     REGISTER_USER("ru", RegisterUser.class),
     SEND_MESSAGE("sm", SendMessage.class),
     USER_LIST("ul", UserList.class),

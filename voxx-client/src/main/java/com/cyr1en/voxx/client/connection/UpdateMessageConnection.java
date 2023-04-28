@@ -22,8 +22,8 @@ public class UpdateMessageConnection implements Runnable {
         this.socket = new Socket(host, port);
         socket.setKeepAlive(true);
         this.out = new PrintWriter(this.socket.getOutputStream(), true);
-        setConnection(user.getUsername());
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        setConnection(user.getUsername());
         onUpdateMessage = (s) -> {
         };
         isRunning = true;
@@ -35,6 +35,11 @@ public class UpdateMessageConnection implements Runnable {
         req.put("params", param);
         System.out.println("Sending: " + req);
         out.println(ProtocolUtil.flattenJSONObject(req));
+        try {
+            // Just flush whatever the response is for now
+            reader.readLine();
+        } catch (IOException ignore) {
+        }
     }
 
     public BufferedReader getReader() {
@@ -71,6 +76,7 @@ public class UpdateMessageConnection implements Runnable {
                 var json = new JSONObject(line);
                 onUpdateMessage.accept(json);
             }
-        } catch (IOException ignore) {}
+        } catch (IOException ignore) {
+        }
     }
 }

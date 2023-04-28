@@ -1,0 +1,45 @@
+name: Build Installers
+
+on:
+  release:
+    types: [created]
+    
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, windows-latest]
+        java: [ '17' ]
+      fail-fast: false
+    name: ${{ matrix.os }}
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Echo JAVA_HOME
+      run: echo $JAVA_HOME
+    - name: Verify Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
+    - name: Execute jpackage
+      run: ./gradlew clean :voxx-client:jpackage
+    - name: Get Previous tag
+      id: previoustag
+      uses: "WyriHaximus/github-action-get-previous-tag@v1"
+      with:
+        fallback: 1.0.0
+    - name: Installer paths
+      uses: haya14busa/action-cond@v1
+      id: getInstaller
+      with:
+        cond: ${{ contains(runner.os, 'Windows') }}
+        if_true: voxx-client/build/jpackage/Voxx-Installer-${{ steps.previoustag.outputs.tag }}.msi 
+        if_false: voxx-client/build/jpackage/*.dmg
+    - name: Upload Release Asset
+      env:
+        GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      run:
+        gh release upload ${{ steps.previoustag.outputs.tag }} ${{ steps.getInstaller.outputs.value }}

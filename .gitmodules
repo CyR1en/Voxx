@@ -1,0 +1,3 @@
+[submodule "voxx-client-cli"]
+	path = voxx-client-cli
+	url = https://github.com/CyR1en/voxx-client-cli

@@ -30,7 +30,7 @@ public class SetUpdateConnection implements Request {
         if(Objects.nonNull(user)) {
             event.getClientConnection().setAssocUser(user);
             event.getClientConnection().setSupplementalConnection(true);
-            Server.LOGGER.info("Client ({}) is not a supplemental connection for ({})",
+            Server.LOGGER.info("Client ({}) is now a supplemental connection for ({})",
                     event.getClientConnection().getRemoteAddress(), user);
             event.getClientConnection().sendMessage("{\"response-id\": 1}");
         } else {

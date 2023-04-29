@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest]
+        os: [macOS-13-xl, windows-latest]
         java: [ '17' ]
       fail-fast: false
     name: ${{ matrix.os }}

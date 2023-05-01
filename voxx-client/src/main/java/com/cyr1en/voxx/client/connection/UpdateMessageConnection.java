@@ -2,6 +2,7 @@ package com.cyr1en.voxx.client.connection;
 
 import com.cyr1en.voxx.commons.model.User;
 import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
+import javafx.application.Platform;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -16,6 +17,7 @@ public class UpdateMessageConnection implements Runnable {
     private final BufferedReader reader;
     private final PrintWriter out;
     private Consumer<JSONObject> onUpdateMessage;
+    private Runnable onDisconnect;
     private boolean isRunning;
 
     public UpdateMessageConnection(User user, String host, int port) throws IOException {
@@ -50,6 +52,10 @@ public class UpdateMessageConnection implements Runnable {
         return socket.isConnected();
     }
 
+    public void onDisconnect(Runnable runnable) {
+        this.onDisconnect = runnable;
+    }
+
     public void onUpdateMessage(Consumer<JSONObject> onUpdateMessage) {
         this.onUpdateMessage = onUpdateMessage;
     }
@@ -61,9 +67,14 @@ public class UpdateMessageConnection implements Runnable {
             this.out.close();
             this.reader.close();
             this.socket.close();
+            Platform.runLater(() -> onDisconnect.run());
         } catch (IOException e) {
             System.out.println("Could not properly close connection!");
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     @Override
@@ -76,7 +87,9 @@ public class UpdateMessageConnection implements Runnable {
                 var json = new JSONObject(line);
                 onUpdateMessage.accept(json);
             }
-        } catch (IOException ignore) {
+        } catch (IOException exception) {
+            System.out.println("Connection closed");
+            closeConnection();
         }
     }
 }

@@ -82,6 +82,8 @@ public class ChatController {
     public void startTask() {
         connectSupplemental();
         instance.getUMConnection().onUpdateMessage(this::handleUM);
+        instance.getUMConnection().onDisconnect(()->addMessage(new Message(system,
+                "Disconnected from the server! Please try re-connecting.", UID.Generator.generate())));
         var executor = Executors.newSingleThreadExecutor();
         executor.execute(instance.getUMConnection());
         executor.shutdown();

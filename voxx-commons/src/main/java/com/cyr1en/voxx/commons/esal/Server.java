@@ -44,7 +44,7 @@ public class Server implements Runnable {
         var executors = new ArrayList<ExecutorService>();
         try {
             serverSocket = new ServerSocket(port, backlog);
-            serverSocket.setReuseAddress(true);
+            serverSocket.setSoTimeout(0);
 
             LOGGER.info("Server abstraction layer started");
 

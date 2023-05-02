@@ -27,7 +27,6 @@ public class ClientConnection implements Runnable {
         this.clientSocket = clientSocket;
         this.eventBus = serverInstance.getEventBus();
         this.serverInstance = serverInstance;
-
         isSupplementalConnection = false;
         try {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -111,6 +110,7 @@ public class ClientConnection implements Runnable {
 
         try {
             String inLine;
+            this.clientSocket.setSoTimeout(0);
             while ((inLine = in.readLine()) != null && isConnected())
                 eventBus.post(new ClientMessageEvent(this, inLine));
             close();

@@ -295,5 +295,246 @@ This update message is sent by the server when a user (client) disconnects from 
 }
 ```
 
+## System/App Class Design
 
+Voxx is managed using `Gradle` and is subdivided into three modules: `voxx-commons`, `voxx-client`, and `voxx-server`. The module names are pretty self-explanatory, `voxx-commons` contains code that both the client and the server would use. The module `voxx-client` will contain the code for the client. And lastly, the `voxx-server` module contains the code for the server. However, on top of these three modules, there’s another “module” (it’s really a python package) that is a git submodule where the python client is hosted and it’s called `voxx-client-cli` since this is a command line interface client for Voxx.
+
+### Voxx Commons
+
+As briefly mentioned before. This module contains all of the code that is going to be used throughout the whole project. However, the socket abstraction layer is mainly used in the `voxx-server` module.
+
+This module contains three main modules, `esal`, `model`, and `protocol`
+
+#### Abstraction Layer (esal)
+
+ESAL or **E**than’s web**s**ocket **a**bstraction **l**ayer is a package that makes implementing the Voxx server easier. This was achieved by implementing an event based socket server. But before we can have an event based system, an event bus is needed.
+
+##### Event Bus
+
+The event bus for the abstraction layer is annotation based, and the annotation’s retention policy is set for runtime, therefore the event bus relies on the [Reflection API](https://docs.oracle.com/javase/tutorial/reflect/index.html). Moreover, the event bus is also multi-threaded to make listener invocations non-blocking (which we need to pay attention to for when we make our listeners).
+
+At it’s core, the design of the event bus is pretty straight forward. When we construct an event bus, we can immediately subscribe listeners as demonstrated here:
+
+```java
+// An event could be any class.
+class SomeEvent { ... }
+
+class SomeEvent2 { ... }
+
+class SomeListeners implements EventBus.Listener {
+    
+   	@EventListener
+    private void onSomeEvent(SomeEvent event) {
+        System.out.println("SomeEvent happened!")
+    }
+    
+   	@EventListener
+    private void onSomeEvent2(SomeEvent2 event) {
+        System.out.println("SomeEvent2 happened!")
+    }
+    
+    public static void main(String[] args) {
+        EventBus bus = new EventBus();
+        bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
+    }
+}
+```
+
+The `EventBus#subscribeListener(EventBus.Listener listener)` method will reflectively iterate through all of the declared methods inside of that `Listener` class and will extract [Methods](https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html) that are annotated with `@EventListener`. It is important to note that we actually construct the listener class because we need to store it in the `ListenerMethod` class so that we can successfully pass it to the method invocation later via reflection api.
+
+We can now look at how to `post` an event so that we could invoke listener methods. Here’s a demo on how to post the events define above and a corresponding output:
+
+```java
+public static void main(String[] args) {
+	EventBus bus = new EventBus();
+    bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
+        
+    bus.post(new SomeEvent()); // <--- Post with no runnable that runs after.
+    System.out.println();
+    bust.post(new SomeEvent2(), () -> System.out.println("Done posting SomeEvent2")); // <--- Post with runnable  
+}
+```
+
+Output:
+
+```
+SomeEvent happened!
+
+SomeEvent2 happened!
+Done posting SomeEvent2
+```
+
+Now that we have a fully working event bus, we implemented the following events, `ClientConnectEvent`, `ClientDisconnectEvent`, and `ClientMessageEvent` that we need to post when implement the abstraction layer for the server.
+
+##### Server Abstraction Layer
+
+This implementation is very similar on how we implemented the server socket in class where we have a main thread that waits for connections and construct client workers (called `ClientConnection`) and run on a different thread. The only difference is that we take advantage of the `EventBus` so that whenever a new connection is accepted and a `ClientConnection` is constructed, we post a `ClientConnectEvent` with the matching `ClientConnection`.
+
+```java
+var clientConnection = new ClientConnection(clientSocket, this); // "this" is the Server instance
+LOGGER.info(String.format("New client (%s)", clientConnection.getRemoteAddress()));
+eventBus.post(new ClientConnectEvent(clientConnection), () -> clientConnections.add(clientConnection));
+```
+
+Once posted, we then execute this `ClientConnection` on a different thread.
+
+###### ClientConnection
+
+This is also implement very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
+
+```java
+try {
+    String inLine;
+    while ((inLine = in.readLine()) != null && isConnected())
+        eventBus.post(new ClientMessageEvent(this, inLine)); // <--- instance of ClientMessageEvent and the line
+    close();
+} catch (IOException e) {
+	Server.LOGGER.error(e.getMessage());
+	close();
+}
+```
+
+On top of posting the `ClientMessageEvent` we can also see that we are calling the `close` function when we exit the while loop or caught an exception. The `close()` function essentially closes the client socket and the in/out stream. Once closed, we post a `ClientDisconnect` Event.
+```java
+public void close() {
+    try {
+        if (!clientSocket.isClosed()) {
+            in.close();
+            out.close();
+            clientSocket.close();
+            serverInstance.getClientConnections().remove(this);
+            eventBus.post(new ClientDisconnectEvent(this));
+            isRunning = false;
+        }
+    } catch (IOException e) {
+    	Server.LOGGER.error("Could not properly close connection! " + e.getMessage());
+    }
+}
+```
+
+The information above is everything in the `esal` package and we will see how this is used when we get to the [Voxx Server](#voxx-server) header.
+
+#### Model (model)
+
+This package contains “plain old java objects” `Message`, `User`, and`UID`.  The first two objects are trivial objects, however, I want to focus on the UID because it’s is not that plain and it contains very useful properties.
+
+##### UID
+
+UID or uniquely identifiable descriptors are essentially just a unique id that a `Message` and a `User` is assigned with to make sure that they are unique. This is done by implementing a similar system to [Snowflake ID](https://en.wikipedia.org/wiki/Snowflake_ID). But the main difference is that instead of using 64 bits, we are only using 54 and it is broken down like the following:
+
+```
+111111111111111111111111111111111111111111  111111111111
+54                                       12            0
+```
+
+| Field          | Bits  | Description                                                  | Retrieval           |
+| -------------- | ----- | ------------------------------------------------------------ | ------------------- |
+| Timestamp      | 12-53 | Millisecond since Epoch (Could be any  arbitrary epoch that we chose) | (uid >> 12) + epoch |
+| Incremental ID | 0-11  | If multiple creation request happens in  the same timeline we increment this | uid & 0xFFF         |
+
+The chosen epoch for the UID implementation is:  `TIME_EPOCH = 0x64b62a60`
+
+On top of this UID class, we also have an inner `Generator` class (factory class). It’s a thread safe UID generator and will always produce a unique UID.
+
+###### UID Property
+
+- Since the UID contains a timestamp, that means we can take advantage of that information to show timestamps on our messages. Therefore the UID class also comes with other utility functions that automatically convert that timestamp to local date time and format them.
+
+- A UID is also easily transportable because it’s essentially just a binary data that you can convert to a number `long` for this instance.
+- There is no data persistence in Voxx but if there is, we can easily store objects in a database using UID. Which is the main motivator on developing the `Snowflake ID`
+
+#### Protocol (protocol)
+
+This package does not contain significant code since the protocol is outside of the scope of the commons/abstraction layer. Therefore the source code for the protocol defined above is implemented in the module `voxx-server`. However this package contains two things, the interface for `Request` and `ProtocolUtil`
+
+- ProtocolUtil
+  - This class essentially just contains a static helper function that takes in JSON objects and returns it as a flattened string, ready to be sent to the server/client.
+- Request
+  - This is just an interface for a request that contains a function that implementors must implement to be considered as a Request.
+
+### Voxx Servers
+
+This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is actually pretty simple and it can be broken down like the following.
+```java
+public class VoxxServer extends Server implements EventBus.Listener {
+	
+    public VoxxServer() {
+        // .... constructor code here.
+        getEventBus().subscribeListeners(this);
+    }
+    
+    @EventListener
+    public void onClientConnect(ClientConnectEvent event) {
+        // ... Code when a client connects.
+    }
+    
+    @EventListener
+    public void onClientMessage(ClientMessageEvent event) {
+        // ... Code when a client sends a message
+    }
+    
+	@EventListener
+    public void onClientDisconnect(ClientDisconnectEvent event) {
+        // ... Code when a client disconnects
+    }
+}
+```
+
+However, before we dive down on how Voxx-server is using these events, we first need a few objects that would help us. Let’s start with the `UserRegistry`.
+
+##### User Registry 
+
+The user registry contains a concurrent hashmap (ConcurrentHashMap<String, User>) that stores the user object using the username as a key. Since we don’t want to immediately register clients as a user, this class is not used until the socket client successfully sends a [Register User Request](#register-user). The main purpose of this class is to contain registered users and will be used to later for when a client sends a [Get Users](#getting-user-list). To handle these request we heed a handler and we’ll call this `ProtocolHandler`
+
+##### ProtocolHandler
+
+The protocol handler contains an inner class called `RequestParser` that parses incoming message. This parser will try to parse the message as Json object and see if it would throw a JSONException, indicating that the message does not have a Json syntax. If it is, this parser will then look at the json attribute called “request-id” and find a matching ID that exist in the `RequestEnum` and reflectively construct and return that `Request`. 
+
+The ProtocolHandler also consist a function called `handleOnMessage(ClientMessageEvent event)` that would be called inside the event listener that we have above. With the request parser this is what that function looks like:
+
+```java
+public void handOnMessage(ClientMessageEvent event) {
+    var req = RequestParser.parse(event, serverInstance);
+    if (Objects.nonNull(req))
+    	req.onRequest(event);
+}
+```
+
+Now that we’ve defined objects that we need. Let’s now talk about how Voxx-server handles each events above.
+
+#### On Client Connect
+
+Since the client needs to send a register request before they could be added in the `UserRegistry` , the ClientMessageEvent does not really do anything other than logging that a new client connected to the server. 
+
+It is also important to note that this type of ClientConnection is still not set at this point. So we must wait if this connection is going to be set as a [Response-Request Connection](#response-request-connection) or an [Update Message Connection](#update-message-connection)
+
+#### On Message
+
+On this event, we are going to use the `handleOnMessage` function that could be found in the `ProtocolHandler`. This should automatically parse the message and construct the matching request and call the `onRequest` function that a request needs to implement.
+
+```java
+@EventListener
+public void onClientMessage(ClientMessageEvent event) {
+	// ... code
+	
+    var msg = event.getMessage();
+    Server.LOGGER.info("[Vox] Client said: " + msg);
+    protocolHandler.handOnMessage(event);
+}
+```
+
+#### On Client Disconnect
+
+At this point, on the abstraction layer, the client is already disconnected. Therefore, we really can’t do anything socket wise. So when Voxx gets this event, it does the following:
+
+- Checks if this client connection that disconnected was a supplemental connection or does not have an associated user.
+  - If it doesn’t, we don’t need to do anything, so return and short the function.
+- Get the associated user for that client connection and remove the user from the `UserRegistry`
+- Broadcast that the client with the user info disconnected.
+
+### Voxx Client
+
+
+
+### Voxx Client CLI
 

@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public class Ping implements Request {
     private final VoxxServer server;
 
-    public Ping(VoxxServer voxx) {
+    Ping(VoxxServer voxx) {
         this.server = voxx;
     }
 

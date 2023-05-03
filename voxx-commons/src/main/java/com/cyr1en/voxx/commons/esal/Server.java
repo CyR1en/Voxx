@@ -36,8 +36,6 @@ public class Server implements Runnable {
         return clientConnections;
     }
 
-
-
     @Override
     public void run() {
         ServerSocket serverSocket = null;

@@ -190,7 +190,6 @@ public class EventBus {
      * A super basic listener that does not have any methods to implement. It's sole purpose is purely
      * semantics so that in code, it is clear that we're actually dealing with listeners for an event.¬
      */
-    public interface Listener {
-    }
+    public interface Listener { }
 
 }

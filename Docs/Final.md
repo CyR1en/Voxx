@@ -1,8 +1,17 @@
 <p align="center">
   <img width="100" src="logo@0.5x.png" />
 </p>
-
 Voxx is a desktop/command-line non-persistent drop in public chat channel, where users can chat with other connected users with a degree of anonymity. Users could also host their own Voxx server to setup a communication medium for their own use cases.
+
+## Goals
+
+Since Voxx is a simple chat application we only need few simple goals as well.
+
+- [x] **Multi-Client Server**: It is critical that the server is able to serve and handle multiple clients that connects to the server.
+- [x] **Reliable Connection**: The connection between the client and the server needs to be stable and all of the features like sending messages and getting updates must still work until the client disconnects from the sever.
+- [x] **Robust Cominication Protocol**: The communication between the server and the client must be straight forward and easy to understand.
+- [x] **Deployable Clients**: Voxx clients that's easy to install for the end user/clients.
+- [x] **Deployable Server:** Make it easy for users to be able to start their own voxx server for their own use case.
 
 ## Use cases
 
@@ -534,7 +543,81 @@ At this point, on the abstraction layer, the client is already disconnected. The
 
 ### Voxx Client
 
+This module contains the JavaFX client for Voxx.
 
+#### User Interface
+
+For Project Voxx Java client, we have two main scenes: `Login scene` and `Chatbox scene`
+
+<p align="center">
+  <img width="200" src="screenshot/UI-login.png" />
+  <img width="200" src="screenshot/UI-Chatbox.png"/>
+</p>
+
+
+To allow us to switch scenes with ease, we also implemented a utility class called `PrimaryStageManager` that contains a function called `#setScene(String fxml, Consumer<T> controllerConsumer)`. This function allows you to pass in a consumer where the instance of the controller is passed just in case you have to call functions of the controller when the fxml is loaded.
+
+#### Controllers
+
+Currently, the Voxx java client connection is implemented using the classes `ChatController` and `LoginController`. 
+
+###### Login Controller
+
+`LoginController` is responsible for controlling the login screen of the application. When the scene is loaded , and the controller is initialized, it will construct the `ConnectionTask` and run it on a different thread. By default, Voxx will try to connect to the server with the address `localhost` and port `8008` (_which is the voxx-server running on local machine_). If there is no voxx-server running on localhost, the connection indicator will turn red. To connect to a different server, you can click the red dot and provide the server address and port using the following format: `server_addres:port`. The controller will now then try to connect to that new server.
+
+Once connected, we now need to register a new user. To do so, we need to provide a username and click the `Start Chatting` button. It will check if the username that is entered is valid. We have designated a valid username to be between 4-7 characters, also allowing for numbers and underscores, however the username cannot start with numbers first. It then sends a request to the server to create a new user with the entered username. If the request is successful, the controller will now call `#setScene()` in the `PrimaryStageManager` to change the scene to the `Chatbox` scene.
+
+###### Chat Controller
+
+`ChatController` is responsible for controlling the user-interface experience of the application. It handles the display and sending of messages, updating user lists, and connecting to the server to receive updates.
+
+#### Connection
+
+Currently, the Voxx java client connection is implemented utilizing the class `ReqResClientConnection` and, optionally, `UpdateMessageConnection`.
+
+###### Request-Response Connection
+
+The implementation of the `ReqResClientConnection` follows the documentation above when it comes to the `Request-Response` connection. Therefore any request sent from this connection type will be blocking and will always wait for response from the server. 
+
+###### Update Message Connection
+
+Like the `Response-Reques` connection, this connection type was also implemented by following the documentation about the Update message connection under the [Protocol](#protocol) hearder.
+
+###### ConnectionTask
+
+On top of the two connection implementation above, we also wrote a JavaFX task that would try connection to the server with `n` number of times. By default, this will try connecting to the defined address 3 times.
+
+###### Connection flow
+
+```mermaid
+graph TD;
+    A(Start) --> B(ConnectionTask tries to connect to server)
+    B --> |Connection successful| C(Client registers a user)
+    C --> |User registration successful| D(Scene changes to Chatbox)
+    D --> |Chatbox scene loaded| E(Establish Update Message Connection)
+
+```
 
 ### Voxx Client CLI
 
+Voxx CLI is a command line interface client for Voxx, it's written in python and has its own repo and added as a git sub module for the main Voxx repository.
+
+Voxx CLI initially starts as a pure CLI application when connection has not been established yet. But as soon as the connection is established a valid user is registered, the CLI runs a text user interface (TUI) using the library `Textual`.
+
+#### Modules
+
+For Voxx cli, we have 4 modules. One of them is the main module which called `voxx` and inside of that module we have `connections`, `model` and `tui`.
+
+##### voxx module
+
+The voxx module is actually not really a python file but it's just a directory with `__init__.py`  and `__main__.py` in it. This package/module also contains the other modules. However, under this header we'll just talk about the double underscore (dunder) files for now.
+
+###### `__init.py__`
+
+This file effectively makes it so that this package/directory is considered a module. This file also contains meta data like the app name, version, author, and description, that we're going to use for `setuptool` when we install or build distribution for the python application.
+
+###### `__main__.py`
+
+This is essentially considered to be the main file for the module. It esssentially works as a main method for the module but inside of this file we also have a standard `if __name__ == __main__:` condition. This file is also the entry point of our cli application and setuptool is directed to make a script for it.
+
+Because this is our entry point, this is also where we initialized 

@@ -15,13 +15,25 @@ Since Voxx is a simple chat application we only need few simple goals as well.
 
 ## Use cases
 
-Since Voxx is a simple, non-persistent, chat application, we don't really have an extensive list of use cases. However, the use cases changes a bit when using the cli and the desktop client.
+Since Voxx is a simple, non-persistent, chat application, we don't really have an extensive list of use cases. However, for the use cases that we do have, it changes a bit when using the cli and the desktop client.
 
 - **Changing server**
+  - Allows the user to change the Voxx server that they want to connect to.
   - For the desktop client:  this can be done by right clicking the connection status circle and typing the new address.
   - For the cli client: this is changed by passing in a parameter `-a <address>` 
 - **Registering a User**
-  - Before a client can send chat messages to the server, the client connection needs to register a user for that connection first. This is done by inputing a username in the desktop client and passing a username argument in the cli app
+  - Before a client can send chat messages to the server, the client connection needs to register a user for that connection first. 
+  - For desktop client: this is done by inputing a username in the desktop client and by pressing "Start Chatting"
+  - For cli client: this is changed by passing in a parameter `-u <username>` 
+- **Sending a Chat Message**
+  - This use case is when a user wants to send a message to the server, allowing other connected users to see the message as well.
+- **List Connected User**
+  - For the CLI client, this allows the user to list all of the connected users in the server.	
+  - This use case is not available for the desktop client because it has a sidebar that contains a list of connected users.
+- **Disconnecting from the Server**
+  - This is essentially just closing or quitting from the application. However, it's important that we properly handle disconnects so that we could broad cast an update message correctly.
+
+These are just simple user use cases when using Voxx. However, for a more general use case/usage for our application, here are just a few things Voxx could be used for.
 
 - **Anonymous support groups**: Voxx can be used as a platform for anonymous support groups where people can connect with others who are going through similar struggles. The fact that messages are not logged or saved can create a sense of
   privacy and safety for users.
@@ -363,7 +375,7 @@ We can now look at how to `post` an event so that we could invoke listener metho
 
 ```java
 public static void main(String[] args) {
-	EventBus bus = new EventBus();
+		EventBus bus = new EventBus();
     bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
         
     bus.post(new SomeEvent()); // <--- Post with no runnable that runs after.
@@ -397,7 +409,7 @@ Once posted, we then execute this `ClientConnection` on a different thread.
 
 ###### ClientConnection
 
-This is also implement very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
+This is also implemented very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
 
 ```java
 try {
@@ -471,7 +483,7 @@ This package does not contain significant code since the protocol is outside of 
 
 ### Voxx Servers
 
-This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is actually pretty simple and it can be broken down like the following.
+This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is pretty simple and it can be broken down like the following.
 ```java
 public class VoxxServer extends Server implements EventBus.Listener {
 	
@@ -668,9 +680,9 @@ def assert_rr(func):
     return wrapper
 ```
 
-This decorator does not really throw an exception since we don't want our program to crash when the `Request-Response Client`. Therefore, the decorator just returns a `None` and it essentially just act like the response from that request is `None`
+This decorator does not really throw an exception since we don't want our program to crash when the `Request-Response Client` isn't available to use. Therefore, the decorator just returns a `None` and it essentially just act like the response from that request is `None`
 
-This is going to be used like this:
+This decorator is going to be used like this:
 
 ```python
 @assert_rr
@@ -690,9 +702,9 @@ Like I've mentioned, once the connection is establised from the connection modul
 
 ###### The Voxx TUI App
 
-The class Voxx that could be found in the tui module is a sub class of a `Textual` `App`. Textual is a TUI library that allows us to render conventional UI models in a command line terminal. The TUI for Voxx is really simple, just have one basic `screen` and inside the screen is a `VerticalScroll` container, an `Input` field, and a `Footer`. 
+The class Voxx that could be found in the tui module is a sub class of a `Textual` `App`. Textual is a TUI library that allows us to render conventional UI models in a command line terminal. The TUI for Voxx is really simple, it just has one basic `screen` and inside of that screen is a `VerticalScroll` container, an `Input` field, and a `Footer`. 
 
-The `VerticalScroll` will be used to import two widget, the `MessageBar` and the `NotificationBar`.
+The `VerticalScroll` will be used to inser two widget, the `MessageBar` and the `NotificationBar`.
 
 - Both MessageBar and NotificationBar are a subclass of the widget `Container` that has a border property and a `Static` text.
 
@@ -723,13 +735,13 @@ There is one important thing to note here, since the UpdateMessages are being li
 
 ## Project State
 
-All of the module described above is on its release state and you can download your own copy of every component of this project. The server, and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
+All of the module described above is on its release state and you can download your own copy of every component of this project. The server, and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
 
 Here are the instruction on how to get a ready to use artifact and executables for each component:
 
 ##### Voxx Server
 
-Every commit we do on the main branch of the Voxx GitHub repository, a workflow will be triggered to build the artifact for `voxx-common` and `voxx-sever` and those artifacts is automatically uploaded to my maven repository [repo.cyr1en.com](https://repo.cyr1en.com). To get a server copy, you need to find the latest server artifact which can be found under [`snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT`](https://repo.cyr1en.com/#/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT). Just scroll down and the naming convention of the artifact is `voxx-server-1.0-<build date>-<build number>.jar`. There are two ways to get the artifact, you can click the artifact and download it to your local machine. However if you want to run the server on a server you can get the jarfile by using `wget`
+Every commit we do on the main branch of the Voxx GitHub repository, a workflow will be triggered to build the artifact for `voxx-common` and `voxx-sever` and those artifacts are automatically uploaded to my maven repository [repo.cyr1en.com](https://repo.cyr1en.com). To get a server copy, you need to find the latest server artifact which can be found under [`snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT`](https://repo.cyr1en.com/#/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT). Just scroll down and the naming convention of the artifact is `voxx-server-1.0-<build date>-<build number>.jar`. There are two ways to get the artifact, you can click the artifact and download it to your local machine. However if you want to run the voxx server on a server you can get the jarfile by using `wget`
 
 ```
 wget https://repo.cyr1en.com/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT/voxx-server-1.0-20230504.024024-40.jar

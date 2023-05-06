@@ -655,7 +655,7 @@ Unlike the JavaFX application voxx-cli does not need the registration scene and 
 
 ##### connection module
 
-This module is pretty straight forward module. The paradigm on this module is pretty mixed, both procedural and object oriented. The first part of the module essentially contains contants and the class definition of the connection type  `ResReqClient` and the `UMClient` which inherits the request-response connection but it also inherits a Thread. This is then followed by uninitialized global variables for those type classes that we are going to initialize later using the function `establish_voxx_connection(user: str, addr: tuple)`.
+This module is a pretty straight forward module. The paradigm used on this module is mixed, both procedural and object oriented. The first part of the module essentially contains contants and the class definition of the connection type  `ResReqClient` and the `UMClient` which inherits the request-response connection but it also inherits a Thread. This is then followed by uninitialized global variables for those type classes that we are going to initialize later using the function `establish_voxx_connection(user: str, addr: tuple)`.
 
 In this module, we also took advantage of Python decorators to register update message handlers that essentially just puts the function object into a dictionary. This dictionary is iterated over by the `UMClient` and see if there's any matching function. However for a function to be considered as a handler for update messages, the function name must match the update message id. For example, we want to handle new message updates (the key is `nm`) then the function name needs to be `nm`.
 
@@ -735,7 +735,7 @@ There is one important thing to note here, since the UpdateMessages are being li
 
 ## Project State
 
-All of the module described above is on its release state and you can download your own copy of every component of this project. The server, and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
+All of the module described above is on its release state and you can download your own copy of every component of this project. The server and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
 
 Here are the instruction on how to get a ready to use artifact and executables for each component:
 
@@ -803,4 +803,14 @@ Voxx has two client, a JavaFX client and a CLI client (written python). Here's a
     ```
 
     To understand how to use the cli application
+    
+  - A Voxx server is currently running on `voxx.cyr1en.com` on port `8008`
+  
+    - to connect to this server:
+    
+      ```
+      voxx-cli -a voxx.cyr1en.com:8008 -u <username>
+      ```
+    
+      
 

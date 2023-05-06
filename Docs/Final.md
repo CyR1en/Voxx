@@ -1,20 +1,49 @@
 <p align="center">
   <img width="100" src="logo@0.5x.png" />
 </p>
-
 Voxx is a desktop/command-line non-persistent drop in public chat channel, where users can chat with other connected users with a degree of anonymity. Users could also host their own Voxx server to setup a communication medium for their own use cases.
+
+## Goals
+
+Since Voxx is a simple chat application we only need few simple goals as well.
+
+- [x] **Multi-Client Server**: It is critical that the server is able to serve and handle multiple clients that connects to the server.
+- [x] **Reliable Connection**: The connection between the client and the server needs to be stable and all of the features like sending messages and getting updates must still work until the client disconnects from the sever.
+- [x] **Robust Cominication Protocol**: The communication between the server and the client must be straight forward and easy to understand.
+- [x] **Deployable Clients**: Voxx clients that's easy to install for the end user/clients.
+- [x] **Deployable Server:** Make it easy for users to be able to start their own voxx server for their own use case.
 
 ## Use cases
 
+Since Voxx is a simple, non-persistent, chat application, we don't really have an extensive list of use cases. However, for the use cases that we do have, it changes a bit when using the cli and the desktop client.
+
+- **Changing server**
+  - Allows the user to change the Voxx server that they want to connect to.
+  - For the desktop client:  this can be done by right clicking the connection status circle and typing the new address.
+  - For the cli client: this is changed by passing in a parameter `-a <address>` 
+- **Registering a User**
+  - Before a client can send chat messages to the server, the client connection needs to register a user for that connection first. 
+  - For desktop client: this is done by inputing a username in the desktop client and by pressing "Start Chatting"
+  - For cli client: this is changed by passing in a parameter `-u <username>` 
+- **Sending a Chat Message**
+  - This use case is when a user wants to send a message to the server, allowing other connected users to see the message as well.
+- **List Connected User**
+  - For the CLI client, this allows the user to list all of the connected users in the server.	
+  - This use case is not available for the desktop client because it has a sidebar that contains a list of connected users.
+- **Disconnecting from the Server**
+  - This is essentially just closing or quitting from the application. However, it's important that we properly handle disconnects so that we could broad cast an update message correctly.
+
+These are just simple user use cases when using Voxx. However, for a more general use case/usage for our application, here are just a few things Voxx could be used for.
+
 - **Anonymous support groups**: Voxx can be used as a platform for anonymous support groups where people can connect with others who are going through similar struggles. The fact that messages are not logged or saved can create a sense of
   privacy and safety for users.
-  
+
 - **Event-based chat**: Voxx can be used as a platform for event-based chat channels where people can connect and chat with others who are attending the same event. For example, people attending a conference, music festival, or sporting event can use Voxx to chat with each other.
-  
+
 - **Study groups:** Voxx can be used as a platform for study groups where students can connect and chat with each other about their coursework. The fact that messages are not logged or saved can create a sense of privacy and security for students who may be concerned about their academic performance.
-  
+
 - **Gaming communities**: Voxx can be used as a platform for gaming communities where players can connect and chat with each other about their favorite games. The fact that messages are not logged or saved can create a sense of privacy and security for players who may be concerned about their online reputation.
-  
+
 - **Language exchange**: Voxx can be used as a platform for language exchange where people can connect with others who are looking to practice speaking a different language. The fact that messages are not logged or saved can create a sense of privacy and safety for users who may be hesitant to speak in a new language with strangers.
 
 These are just a few potential use cases for Voxx. With some creative thinking, you can likely come up with many more!
@@ -346,7 +375,7 @@ We can now look at how to `post` an event so that we could invoke listener metho
 
 ```java
 public static void main(String[] args) {
-	EventBus bus = new EventBus();
+		EventBus bus = new EventBus();
     bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
         
     bus.post(new SomeEvent()); // <--- Post with no runnable that runs after.
@@ -380,7 +409,7 @@ Once posted, we then execute this `ClientConnection` on a different thread.
 
 ###### ClientConnection
 
-This is also implement very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
+This is also implemented very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
 
 ```java
 try {
@@ -454,7 +483,7 @@ This package does not contain significant code since the protocol is outside of 
 
 ### Voxx Servers
 
-This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is actually pretty simple and it can be broken down like the following.
+This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is pretty simple and it can be broken down like the following.
 ```java
 public class VoxxServer extends Server implements EventBus.Listener {
 	
@@ -534,7 +563,254 @@ At this point, on the abstraction layer, the client is already disconnected. The
 
 ### Voxx Client
 
+This module contains the JavaFX client for Voxx.
 
+#### User Interface
+
+For Project Voxx Java client, we have two main scenes: `Login scene` and `Chatbox scene`
+
+<p align="center">
+  <img width="200" src="screenshot/UI-login.png" />
+  <img width="200" src="screenshot/UI-Chatbox.png"/>
+</p>
+
+
+To allow us to switch scenes with ease, we also implemented a utility class called `PrimaryStageManager` that contains a function called `#setScene(String fxml, Consumer<T> controllerConsumer)`. This function allows you to pass in a consumer where the instance of the controller is passed just in case you have to call functions of the controller when the fxml is loaded.
+
+#### Controllers
+
+Currently, the Voxx java client connection is implemented using the classes `ChatController` and `LoginController`. 
+
+###### Login Controller
+
+`LoginController` is responsible for controlling the login screen of the application. When the scene is loaded , and the controller is initialized, it will construct the `ConnectionTask` and run it on a different thread. By default, Voxx will try to connect to the server with the address `localhost` and port `8008` (_which is the voxx-server running on local machine_). If there is no voxx-server running on localhost, the connection indicator will turn red. To connect to a different server, you can click the red dot and provide the server address and port using the following format: `server_addres:port`. The controller will now then try to connect to that new server.
+
+Once connected, we now need to register a new user. To do so, we need to provide a username and click the `Start Chatting` button. It will check if the username that is entered is valid. We have designated a valid username to be between 4-7 characters, also allowing for numbers and underscores, however the username cannot start with numbers first. It then sends a request to the server to create a new user with the entered username. If the request is successful, the controller will now call `#setScene()` in the `PrimaryStageManager` to change the scene to the `Chatbox` scene.
+
+###### Chat Controller
+
+`ChatController` is responsible for controlling the user-interface experience of the application. It handles the display and sending of messages, updating user lists, and connecting to the server to receive updates.
+
+#### Connection
+
+Currently, the Voxx java client connection is implemented utilizing the class `ReqResClientConnection` and, optionally, `UpdateMessageConnection`.
+
+###### Request-Response Connection
+
+The implementation of the `ReqResClientConnection` follows the documentation above when it comes to the `Request-Response` connection. Therefore any request sent from this connection type will be blocking and will always wait for response from the server. 
+
+###### Update Message Connection
+
+Like the `Response-Reques` connection, this connection type was also implemented by following the documentation about the Update message connection under the [Protocol](#protocol) hearder.
+
+###### ConnectionTask
+
+On top of the two connection implementation above, we also wrote a JavaFX task that would try connection to the server with `n` number of times. By default, this will try connecting to the defined address 3 times.
+
+###### Connection flow
+
+```mermaid
+graph TD;
+    A(Start) --> B(ConnectionTask tries to connect to server)
+    B --> |Connection successful| C(Client registers a user)
+    C --> |User registration successful| D(Scene changes to Chatbox)
+    D --> |Chatbox scene loaded| E(Establish Update Message Connection)
+
+```
 
 ### Voxx Client CLI
+
+Voxx CLI is a command line interface client for Voxx, it's written in python and has its own repo and added as a git sub module for the main Voxx repository.
+
+Voxx CLI initially starts as a pure CLI application when connection has not been established yet. But as soon as the connection is established a valid user is registered, the CLI runs a text user interface (TUI) using the library `Textual`.
+
+#### Modules
+
+For Voxx cli, we have 4 modules. One of them is the main module which called `voxx` and inside of that module we have `connections`, `model` and `tui`.
+
+##### voxx module
+
+The voxx module is actually not really a python file but it's just a directory with `__init__.py`  and `__main__.py` in it. This package/module also contains the other modules. However, under this header we'll just talk about the double underscore (dunder) files for now.
+
+###### `__init.py__`
+
+This file effectively makes it so that this package/directory is considered a module. This file also contains meta data like the app name, version, author, and description, that we're going to use for `setuptool` when we install or build distribution for the python application.
+
+###### `__main__.py`
+
+This is essentially considered to be the main file for the module. It esssentially works as a main method for the module but inside of this file we also have a standard `if __name__ == __main__:` condition. This file is also the entry point of our cli application and setuptool is directed to make a script for it.
+
+Because this is our entry point, this is also where we initialized initialized our CLI structure. Using Python's `argparse` module, we have the following commands available:
+
+```
+Usage: voxx-cli [options] <arg>
+
+-h   --help                      show this help message and exit
+-a   --address ADDRESS           voxx server address
+-u   --user USERNAME             username to register as
+-v   --version                   show program's version number and exit
+```
+
+Unlike the JavaFX application voxx-cli does not need the registration scene and all of that is by the command line. Therefore when the text user interface or the TUI application is loaded, the connection to the server, both response-request and update message, has already been established. And this is done by passing in the command line arguments into the `establish_voxx_connection` function that could be found in the `connection` module.
+
+##### connection module
+
+This module is a pretty straight forward module. The paradigm used on this module is mixed, both procedural and object oriented. The first part of the module essentially contains contants and the class definition of the connection type  `ResReqClient` and the `UMClient` which inherits the request-response connection but it also inherits a Thread. This is then followed by uninitialized global variables for those type classes that we are going to initialize later using the function `establish_voxx_connection(user: str, addr: tuple)`.
+
+In this module, we also took advantage of Python decorators to register update message handlers that essentially just puts the function object into a dictionary. This dictionary is iterated over by the `UMClient` and see if there's any matching function. However for a function to be considered as a handler for update messages, the function name must match the update message id. For example, we want to handle new message updates (the key is `nm`) then the function name needs to be `nm`.
+
+```python
+@um_handler
+def nu(self, msg: SimpleNamespace) -> None:
+	"""Handles new user update message"""
+```
+
+Other than the `@um_handler` decorator, we also have a decorator named `@assert_rr` that essentially make sure that the request-response connection is established before any of the request functions can be used.
+
+```python
+def assert_rr(func):
+    def wrapper(*args, **kwargs):
+        try:
+            if res_req_conn is None:
+                console.print("RR connection not established!", style="bold red")
+                return None
+            return func(*args, **kwargs)
+        except ConnectionResetError:
+            return None
+    return wrapper
+```
+
+This decorator does not really throw an exception since we don't want our program to crash when the `Request-Response Client` isn't available to use. Therefore, the decorator just returns a `None` and it essentially just act like the response from that request is `None`
+
+This decorator is going to be used like this:
+
+```python
+@assert_rr
+def register_user(username: str) -> SimpleNamespace:
+    return res_req_conn.request({"request-id": "ru", "params": {"uname": username}})
+```
+
+Functions for the other request defined under the protocl heading is also defined in this module.
+
+##### model module
+
+This module is just a python version of the Java's `voxx.commons.module` package. The only difference is that the Python version of the UID does not have a generator since UID generation is going to be handled by the server anyways.
+
+##### tui module
+
+Like I've mentioned, once the connection is establised from the connection module in the `__main__.py`, it will start the TUI application named Voxx. It's essentially a command line version of the `ChatBox` scene for the Java FX application. The only difference is that the TUI does not have the side bar that shows all of the connected users.
+
+###### The Voxx TUI App
+
+The class Voxx that could be found in the tui module is a sub class of a `Textual` `App`. Textual is a TUI library that allows us to render conventional UI models in a command line terminal. The TUI for Voxx is really simple, it just has one basic `screen` and inside of that screen is a `VerticalScroll` container, an `Input` field, and a `Footer`. 
+
+The `VerticalScroll` will be used to inser two widget, the `MessageBar` and the `NotificationBar`.
+
+- Both MessageBar and NotificationBar are a subclass of the widget `Container` that has a border property and a `Static` text.
+
+For the input field, it was just left default and no other property changes was done to it. The same case goes for the `Footer` but it will house the bindings we registered for the application.
+
+Beyond the widgets, the update message handlers are also defined in this Voxx application class:
+
+```python
+@um_handler
+def nu(self, msg: SimpleNamespace) -> None:
+    """Handles new user update message: called from thread-2"""
+    self.call_from_thread(self._add_notif, f'{msg.body.user.uname} has connected', 'User Connect', None)
+
+@um_handler
+def nm(self, msg: SimpleNamespace) -> None:
+    """Handles new message update message: called from thread-2"""
+    sender = User(UID.of(int(msg.body.sender.uid)), msg.body.sender.uname)
+    time = UID.of(int(msg.body.message.uid)).get_timestamp_string()
+    self.call_from_thread(self._add_msg, msg.body.message.content, sender.username, time)
+
+@um_handler
+def ud(self, msg: SimpleNamespace) -> None:
+    """Handles user disconnect update message: called from thread-2"""
+    self.call_from_thread(self._add_notif, f'{msg.body.user.uname} has disconnected', 'User Disconnect', None)
+```
+
+There is one important thing to note here, since the UpdateMessages are being listened to on a different thread, we need to make sure that we have our app call UI changes on the same thread of the TUI, this is why we use the function `App#call_from_thread` which is essentially the same as `Platform.runLater` for JavaFX.
+
+## Project State
+
+All of the module described above is on its release state and you can download your own copy of every component of this project. The server and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
+
+Here are the instruction on how to get a ready to use artifact and executables for each component:
+
+##### Voxx Server
+
+Every commit we do on the main branch of the Voxx GitHub repository, a workflow will be triggered to build the artifact for `voxx-common` and `voxx-sever` and those artifacts are automatically uploaded to my maven repository [repo.cyr1en.com](https://repo.cyr1en.com). To get a server copy, you need to find the latest server artifact which can be found under [`snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT`](https://repo.cyr1en.com/#/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT). Just scroll down and the naming convention of the artifact is `voxx-server-1.0-<build date>-<build number>.jar`. There are two ways to get the artifact, you can click the artifact and download it to your local machine. However if you want to run the voxx server on a server you can get the jarfile by using `wget`
+
+```
+wget https://repo.cyr1en.com/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT/voxx-server-1.0-20230504.024024-40.jar
+```
+
+Once you have a copy of the voxx server, all you have to do now is run it. But before you could do that, we have to make sure that the machine you're running the Voxx server has the port `8008` open. 
+
+Once done, you can now run the server. You can use `tmux` or `screen` if you're accessing your server via `ssh`.
+
+- For `tmux`
+
+  ```
+  tmux
+  java -Xms256M -jar voxx-server-1.0-20230504.024024-40.jar
+  ```
+
+  - Once started you can press `ctrl + b` followed by `d` on your keyboard to detach from this window.
+
+- For `screen`
+
+  ```
+  screen java -Xms256M -jar voxx-server-1.0-20230504.024024-40.jar
+  ```
+
+  - Once started you can press `ctrl + a` followed by `d` on your keyboard to detach from the session.
+
+- Launching on local machine
+
+  ```
+  java -Xms256M -jar voxx-server-1.0-20230504.024024-40.jar
+  ```
+
+  - Just make sure you don't close the terminal window or else the server will shutdown.
+
+##### Voxx client
+
+Voxx has two client, a JavaFX client and a CLI client (written python). Here's an instruction on how to install each one of them,
+
+- Voxx Desktop Client (JavaFX)
+
+  - You can get the latest installer on the release page of Voxx [here](https://github.com/CyR1en/Voxx/releases)
+    - An installer is available for windows and macos. For now there is no way to make an installer for Linux.
+  - Note: The installer is not signed, therefore your operating system will warn you when you run the installer
+
+- Voxx CLI
+
+  - The command line client for Voxx is currently distributed on `PyPi` and could be found [here](https://pypi.org/project/voxx-cli/)
+
+  - As long as you have Python 3.7 or greater, you can easily install `voxx-cli` by doing the following!
+
+    ```
+    pip install voxx-cli
+    ```
+
+  - Once installed you can just simply just run
+
+    ```
+    voxx-cli -h
+    ```
+
+    To understand how to use the cli application
+    
+  - A Voxx server is currently running on `voxx.cyr1en.com` on port `8008`
+  
+    - to connect to this server:
+    
+      ```
+      voxx-cli -a voxx.cyr1en.com:8008 -u <username>
+      ```
+    
+      
 

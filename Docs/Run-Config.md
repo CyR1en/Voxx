@@ -72,7 +72,7 @@ Instructions on how to run every Voxx component with or without an IDE. A docume
   python -m voxx -h
   ```
 
-## Building Voxx
+## Building Voxx (Without IDE)
 
 - To build and run Voxx server (Assuming the repo is cloned)
 
@@ -98,4 +98,4 @@ Instructions on how to run every Voxx component with or without an IDE. A docume
   voxx-cli -h
   ```
 
-​		(Only gonna be available when venv is active)
+​		(Only going to be available when venv is active)

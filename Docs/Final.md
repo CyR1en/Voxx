@@ -52,7 +52,7 @@ These are just a few potential use cases for Voxx. With some creative thinking, 
 
 This documentation specifies what the server for Project-Voxx is going to accept with its corresponding response and messages that a server could send. Therefore, a client needs to anticipate non-requested messages from the server.
 
-#### Server-Client Communication Overview
+### Server-Client Communication Overview
 
 At its core, Project-Voxx protocol is going to be transported through `websocket`. The communication is text based, therefore, all the message received and sent by the message is going to be a `String`. To have a clear and easy to parse message, we’ve opted into using the `json` syntax for our messages. However, the `json` syntax needs to be flattened and `must not have any break line`. Use the following regex replacement on your `json` string before sending requests to the server:
 
@@ -375,7 +375,7 @@ We can now look at how to `post` an event so that we could invoke listener metho
 
 ```java
 public static void main(String[] args) {
-	EventBus bus = new EventBus();
+		EventBus bus = new EventBus();
     bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
         
     bus.post(new SomeEvent()); // <--- Post with no runnable that runs after.
@@ -570,9 +570,9 @@ This module contains the JavaFX client for Voxx.
 For Project Voxx Java client, we have two main scenes: `Login scene` and `Chatbox scene`
 
 <p align="center">
-  <img width="200" src="screenshot/UI-login.png" />
-  <img width="200" src="screenshot/UI-Chatbox.png"/>
+  <img width="200" src="screenshot/UI-login.png" /> <img width="200" src="screenshot/UI-Chatbox.png"/>
 </p>
+
 
 
 To allow us to switch scenes with ease, we also implemented a utility class called `PrimaryStageManager` that contains a function called `#setScene(String fxml, Consumer<T> controllerConsumer)`. This function allows you to pass in a consumer where the instance of the controller is passed just in case you have to call functions of the controller when the fxml is loaded.

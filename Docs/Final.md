@@ -1,15 +1,15 @@
 <p align="center">
   <img width="100" src="logo@0.5x.png" />
 </p>
-Voxx is a desktop/command-line non-persistent drop in public chat channel, where users can chat with other connected users with a degree of anonymity. Users could also host their own Voxx server to setup a communication medium for their own use cases.
+Voxx is a desktop/command-line, non-persistent, drop-in, public chat channel, where users can chat with other connected users with a degree of anonymity. Users could also host their own Voxx server to set up a communication medium for their own use cases.
 
 ## Goals
 
-Since Voxx is a simple chat application we only need few simple goals as well.
+Since Voxx is a simple chat application, we only need a few simple goals as well.
 
-- [x] **Multi-Client Server**: It is critical that the server is able to serve and handle multiple clients that connects to the server.
-- [x] **Reliable Connection**: The connection between the client and the server needs to be stable and all of the features like sending messages and getting updates must still work until the client disconnects from the sever.
-- [x] **Robust Cominication Protocol**: The communication between the server and the client must be straight forward and easy to understand.
+- [x] **Multi-Client Server**: It is critical that the server is able to serve and handle multiple clients that connect to the server.
+- [x] **Reliable Connection**: The connection between the client and the server needs to be stable, and all the features like sending messages and getting updates must still work until the client disconnects from the sever.
+- [x] **Robust Communication Protocol**: The communication between the server and the client must be straight forward and easy to understand.
 - [x] **Deployable Clients**: Voxx clients that's easy to install for the end user/clients.
 - [x] **Deployable Server:** Make it easy for users to be able to start their own voxx server for their own use case.
 
@@ -19,19 +19,19 @@ Since Voxx is a simple, non-persistent, chat application, we don't really have a
 
 - **Changing server**
   - Allows the user to change the Voxx server that they want to connect to.
-  - For the desktop client:  this can be done by right clicking the connection status circle and typing the new address.
+  - For the desktop client: this can be done by right-clicking the connection status circle and typing the new address.
   - For the cli client: this is changed by passing in a parameter `-a <address>` 
 - **Registering a User**
   - Before a client can send chat messages to the server, the client connection needs to register a user for that connection first. 
-  - For desktop client: this is done by inputing a username in the desktop client and by pressing "Start Chatting"
+  - For desktop client: this is done by inputting a username in the desktop client and by pressing "Start Chatting"
   - For cli client: this is changed by passing in a parameter `-u <username>` 
 - **Sending a Chat Message**
   - This use case is when a user wants to send a message to the server, allowing other connected users to see the message as well.
 - **List Connected User**
-  - For the CLI client, this allows the user to list all of the connected users in the server.	
+  - For the CLI client, this allows the user to list all the connected users in the server.	
   - This use case is not available for the desktop client because it has a sidebar that contains a list of connected users.
 - **Disconnecting from the Server**
-  - This is essentially just closing or quitting from the application. However, it's important that we properly handle disconnects so that we could broad cast an update message correctly.
+  - This is essentially just closing or quitting from the application. However, it's important that we properly handle disconnects so that we could broadcast an update message correctly.
 
 These are just simple user use cases when using Voxx. However, for a more general use case/usage for our application, here are just a few things Voxx could be used for.
 
@@ -78,15 +78,15 @@ Once a socket client registers a user, we now have an established `Response-Requ
 
 ##### Response-Request Connection
 
-This connection from the client handles all of the request that's coming in from the it to the server. This connection is essentially a blocking connection where a client sends a request to the server and will wait for a response. *<u>If you're implementing you're own client, you may want to set a socket timeout.</u>*
+This connection from the client handles all the requests that are coming in from it to the server. This connection is essentially a blocking connection where a client sends a request to the server and will wait for a response. *<u>If you're implementing you're own client, you may want to set a socket timeout.</u>*
 
 ##### Update Message Connection
 
-The update message connection is a supplemental connection that a client sets up to receive update messages from the server. This connection must be setup correctly and a `Response-Request` connection must be established before this connection is setup. Specification for setting up this connection could be found under the heading [Update Message](#update-message)
+The update message connection is a supplemental connection that a client sets up to receive update messages from the server. This connection must be setup correctly and a `Response-Request` connection must be established before this connection is set up. Specification for setting up this connection could be found under the heading [Update Message](#update-message)
 
 ### Request format
 
-Before we can list down all the valid request that a client can make to the server, let’s talk about the format of a request. The format of a request is pretty straight forward and looks like the following:
+Before we can list down all the valid requests that a client can make to the server, let’s talk about the format of a request. The format of a request is pretty straight forward and looks like the following:
 
 ```json
 {
@@ -100,7 +100,7 @@ Before we can list down all the valid request that a client can make to the serv
 
 As we can see, the format is in the `json` syntax. This makes it so that we can serialize and deserialize an object through a `websocket` easily. The attribute named `request-id` is the name of the request that we are making to the server. Depending on the parameters that the request accepts, we need to provide the right amount of parameter that goes with that request, and we must put them in the attribute `params` and attribute params must match the attribute name defined in the request documentation.
 
-For undefined requests the server is going to respond with the following message:
+For undefined requests, the server is going to respond with the following message:
 
 ```json
 {
@@ -132,9 +132,9 @@ Here is the request body that you must send to the server to have a valid regist
 }
 ```
 
-Since Project-Voxx is a non-persistent drop in public chat channel, user do not need a password. The only requirement for user registration is a username and that it’s not taken by any other users in the live server.
+Since Project-Voxx is a non-persistent, drop-in, public chat channel, user does not need a password. The only requirement for user registration is a username, and that it is not taken by any other users in the live server.
 
-If the client socket sends a request with a username that’s already taken the server will respond with the following:
+If the client socket sends a request with a username that’s already taken, the server will respond with the following:
 
 ```json
 {
@@ -174,7 +174,7 @@ When sending a message to the server, the client socket must have a bound `user`
 }
 ```
 
-However, nothing can stop a client form sending a send message request even without sending a user registration request first. If this is the case, the server will respond with the following invalid request response:
+However, nothing can stop a client form sending a message request even without sending a user registration request first. If this is the case, the server will respond with the following invalid request response:
 
 ```json
 {
@@ -185,7 +185,7 @@ However, nothing can stop a client form sending a send message request even with
 }
 ```
 
-When a chat message request was handled properly the server should respond with the following message:
+When a chat message request was handled properly, the server should respond with the following message:
 
 ```json
 {
@@ -201,7 +201,7 @@ When a chat message request was handled properly the server should respond with 
 
 ##### Getting User List
 
-A request that the client can make to get all the registered user in the server.
+A request that the client can make to get all the registered users in the server.
 
 The request body for getting the user list is super simple and does not require any parameter:
 
@@ -251,9 +251,9 @@ As you can see, the response body has one attribute named `users` that contains 
 
 ### Update Message
 
-Update messages are messages that are sent by the server to the clients to update clients about changes that happens in the server. This is for when a user sends a chat message to the server, a new user registers, or when a user disconnects. The client can do whatever they want to do with the update messages, but they’re there so that the clients can display up-to-date information from the server. 
+Update messages are messages that are sent by the server to the clients to update clients about changes that happen in the server. This is for when a user sends a chat message to the server, a new user registers, or when a user disconnects. The client can do whatever they want to do with the update messages, but they are there so that the clients can display up-to-date information from the server. 
 
-Before the client can establish a proper `Update-Message` connection. The `Response-Request` **must be established first and have a registered user**. Once established, we need to make another socket connection to connect to the server to serve as an `Update-Message` connection. It is also important to note that this new socket connection **needs to send keep alive messages**. The keep alive configuration is flexible as long as it is sending it. To set up this new keep alive connection as an `Update-Message` connection, we must send the following request using this new socket connection **not the response-request** connection:
+Before the client can establish a proper `Update-Message` connection. The `Response-Request` **must be established first and have a registered user**. Once established, we need to make another socket connection to connect to the server to serve as an `Update-Message` connection. It is also important to note that this new socket connection **needs to send keep alive messages**. The keep-alive configuration is flexible as long as it is sending it. To set up this new keep-alive connection as an `Update-Message` connection, we must send the following request using this new socket connection **not the response-request** connection:
 
 ```json
 {
@@ -274,7 +274,7 @@ The following are the messages that a client must anticipate from the server.
 
 ##### New User Update Message
 
-This update message is sent to each of the client when a new user is registered so that clients can update their user list (if being tracked). Here’s what the update message looks:
+This update message is sent to each of the clients when a new user is registered so that clients can update their user list (if being tracked). Here’s what the update message looks like:
 
 ```json
 {
@@ -326,23 +326,23 @@ This update message is sent by the server when a user (client) disconnects from 
 
 ## System/App Class Design
 
-Voxx is managed using `Gradle` and is subdivided into three modules: `voxx-commons`, `voxx-client`, and `voxx-server`. The module names are pretty self-explanatory, `voxx-commons` contains code that both the client and the server would use. The module `voxx-client` will contain the code for the client. And lastly, the `voxx-server` module contains the code for the server. However, on top of these three modules, there’s another “module” (it’s really a python package) that is a git submodule where the python client is hosted and it’s called `voxx-client-cli` since this is a command line interface client for Voxx.
+Voxx is managed using `Gradle` and is subdivided into three modules: `voxx-commons`, `voxx-client`, and `voxx-server`. The module names are pretty self-explanatory, `voxx-commons` contains code that both the client and the server would use. The module `voxx-client` will contain the code for the client. And lastly, the `voxx-server` module contains the code for the server. However, on top of these three modules, there’s another “module” (it’s really a python package) that is a git submodule where the python client is hosted, and it’s called `voxx-client-cli` since this is a command line interface client for Voxx.
 
 ### Voxx Commons
 
-As briefly mentioned before. This module contains all of the code that is going to be used throughout the whole project. However, the socket abstraction layer is mainly used in the `voxx-server` module.
+As briefly mentioned before. This module contains all the code that is going to be used throughout the whole project. However, the socket abstraction layer is mainly used in the `voxx-server` module.
 
 This module contains three main modules, `esal`, `model`, and `protocol`
 
 #### Abstraction Layer (esal)
 
-ESAL or **E**than’s web**s**ocket **a**bstraction **l**ayer is a package that makes implementing the Voxx server easier. This was achieved by implementing an event based socket server. But before we can have an event based system, an event bus is needed.
+ESAL or **E**than’s web**s**ocket **a**bstraction **l**ayer is a package that makes implementing the Voxx server easier. This was achieved by implementing an event-based socket server. But before we can have an event-based system, an event bus is needed.
 
 ##### Event Bus
 
-The event bus for the abstraction layer is annotation based, and the annotation’s retention policy is set for runtime, therefore the event bus relies on the [Reflection API](https://docs.oracle.com/javase/tutorial/reflect/index.html). Moreover, the event bus is also multi-threaded to make listener invocations non-blocking (which we need to pay attention to for when we make our listeners).
+The event bus for the abstraction layer is annotation based, and the annotation’s retention policy is set for runtime, therefore, the event bus relies on the [Reflection API](https://docs.oracle.com/javase/tutorial/reflect/index.html). Moreover, the event bus is also multithreaded to make listener invocations non-blocking (which we need to pay attention to for when we make our listeners).
 
-At it’s core, the design of the event bus is pretty straight forward. When we construct an event bus, we can immediately subscribe listeners as demonstrated here:
+At its core, the design of the event bus is pretty straight forward. When we construct an event bus, we can immediately subscribe listeners as demonstrated here:
 
 ```java
 // An event could be any class.
@@ -369,13 +369,13 @@ class SomeListeners implements EventBus.Listener {
 }
 ```
 
-The `EventBus#subscribeListener(EventBus.Listener listener)` method will reflectively iterate through all of the declared methods inside of that `Listener` class and will extract [Methods](https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html) that are annotated with `@EventListener`. It is important to note that we actually construct the listener class because we need to store it in the `ListenerMethod` class so that we can successfully pass it to the method invocation later via reflection api.
+The `EventBus#subscribeListener(EventBus.Listener listener)` method will reflectively iterate through all the declared methods inside that `Listener` class and will extract [Methods](https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html) that are annotated with `@EventListener`. It is important to note that we actually construct the listener class because we need to store it in the `ListenerMethod` class so that we can successfully pass it to the method invocation later via reflection api.
 
-We can now look at how to `post` an event so that we could invoke listener methods. Here’s a demo on how to post the events define above and a corresponding output:
+We can now look at how to `post` an event so that we could invoke listener methods. Here’s a demo on how to post the events defined above and a corresponding output:
 
 ```java
 public static void main(String[] args) {
-		EventBus bus = new EventBus();
+	EventBus bus = new EventBus();
     bus.subscribeListeners(new SomeListeners()) // <--- Listener subscription here
         
     bus.post(new SomeEvent()); // <--- Post with no runnable that runs after.
@@ -409,7 +409,7 @@ Once posted, we then execute this `ClientConnection` on a different thread.
 
 ###### ClientConnection
 
-This is also implemented very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
+This is also implemented very similarly to how we implemented a client worker in class. But as we mentioned before, instead of the abstraction layer handling an incoming message. We will pass down that responsibility to the listener of the `ClientMessageEvent` by posting this event and passing the message.
 
 ```java
 try {
@@ -441,15 +441,15 @@ public void close() {
 }
 ```
 
-The information above is everything in the `esal` package and we will see how this is used when we get to the [Voxx Server](#voxx-server) header.
+The information above is everything in the `esal` package, and we will see how this is used when we get to the [Voxx Server](#voxx-server) header.
 
 #### Model (model)
 
-This package contains “plain old java objects” `Message`, `User`, and`UID`.  The first two objects are trivial objects, however, I want to focus on the UID because it’s is not that plain and it contains very useful properties.
+This package contains “plain old java objects” `Message`, `User`, and`UID`.  The first two objects are trivial objects, however, I want to focus on the UID because it is not that plain, and it contains very useful properties.
 
 ##### UID
 
-UID or uniquely identifiable descriptors are essentially just a unique id that a `Message` and a `User` is assigned with to make sure that they are unique. This is done by implementing a similar system to [Snowflake ID](https://en.wikipedia.org/wiki/Snowflake_ID). But the main difference is that instead of using 64 bits, we are only using 54 and it is broken down like the following:
+UID or uniquely identifiable descriptors are essentially just a unique id that a `Message` and a `User` is assigned with to make sure that they are unique. This is done by implementing a similar system to [Snowflake ID](https://en.wikipedia.org/wiki/Snowflake_ID). But the main difference is that instead of using 64 bits, we are only using 54, and it is broken down like the following:
 
 ```
 111111111111111111111111111111111111111111  111111111111
@@ -463,18 +463,18 @@ UID or uniquely identifiable descriptors are essentially just a unique id that a
 
 The chosen epoch for the UID implementation is:  `TIME_EPOCH = 0x64b62a60`
 
-On top of this UID class, we also have an inner `Generator` class (factory class). It’s a thread safe UID generator and will always produce a unique UID.
+On top of this UID class, we also have an inner `Generator` class (factory class). It is a thread safe UID generator and will always produce a unique UID.
 
 ###### UID Property
 
-- Since the UID contains a timestamp, that means we can take advantage of that information to show timestamps on our messages. Therefore the UID class also comes with other utility functions that automatically convert that timestamp to local date time and format them.
+- Since the UID contains a timestamp, that means we can take advantage of that information to show timestamps on our messages. Therefore, the UID class also comes with other utility functions that automatically convert that timestamp to local date time and format them.
 
 - A UID is also easily transportable because it’s essentially just a binary data that you can convert to a number `long` for this instance.
-- There is no data persistence in Voxx but if there is, we can easily store objects in a database using UID. Which is the main motivator on developing the `Snowflake ID`
+- There is no data persistence in Voxx, but if there is, we can easily store objects in a database using UID. Which is the main motivator on developing the `Snowflake ID`
 
 #### Protocol (protocol)
 
-This package does not contain significant code since the protocol is outside of the scope of the commons/abstraction layer. Therefore the source code for the protocol defined above is implemented in the module `voxx-server`. However this package contains two things, the interface for `Request` and `ProtocolUtil`
+This package does not contain significant code since the protocol is outside the scope of the commons/abstraction layer. Therefore, the source code for the protocol defined above is implemented in the module `voxx-server`. However, this package contains two things, the interface for `Request` and `ProtocolUtil`
 
 - ProtocolUtil
   - This class essentially just contains a static helper function that takes in JSON objects and returns it as a flattened string, ready to be sent to the server/client.
@@ -483,7 +483,7 @@ This package does not contain significant code since the protocol is outside of 
 
 ### Voxx Servers
 
-This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at it’s core, the server implementation is pretty simple and it can be broken down like the following.
+This module is where the server for Voxx is actually implemented. Since we’ve made is so that the Server is actually event based, at its core, the server implementation is pretty simple, and it can be broken down like the following.
 ```java
 public class VoxxServer extends Server implements EventBus.Listener {
 	
@@ -509,17 +509,17 @@ public class VoxxServer extends Server implements EventBus.Listener {
 }
 ```
 
-However, before we dive down on how Voxx-server is using these events, we first need a few objects that would help us. Let’s start with the `UserRegistry`.
+However, before we dive on how Voxx-server is using these events, we first need a few objects that would help us. Let’s start with the `UserRegistry`.
 
 ##### User Registry 
 
-The user registry contains a concurrent hashmap (ConcurrentHashMap<String, User>) that stores the user object using the username as a key. Since we don’t want to immediately register clients as a user, this class is not used until the socket client successfully sends a [Register User Request](#register-user). The main purpose of this class is to contain registered users and will be used to later for when a client sends a [Get Users](#getting-user-list). To handle these request we heed a handler and we’ll call this `ProtocolHandler`
+The user registry contains a concurrent hashmap (ConcurrentHashMap<String, User>) that stores the user object using the username as a key. Since we don’t want to immediately register clients as a user, this class is not used until the socket client successfully sends a [Register User Request](#register-user). The main purpose of this class is to contain registered users and will be used to later for when a client sends a [Get Users](#getting-user-list). To handle these requests, we heed a handler and we’ll call this `ProtocolHandler`
 
 ##### ProtocolHandler
 
-The protocol handler contains an inner class called `RequestParser` that parses incoming message. This parser will try to parse the message as Json object and see if it would throw a JSONException, indicating that the message does not have a Json syntax. If it is, this parser will then look at the json attribute called “request-id” and find a matching ID that exist in the `RequestEnum` and reflectively construct and return that `Request`. 
+The protocol handler contains an inner class called `RequestParser` that parses incoming message. This parser will try to parse the message as a Json object and see if it would throw a JSONException, indicating that the message does not have a Json syntax. If it is, this parser will then look at the json attribute called “request-id” and find a matching ID that exist in the `RequestEnum` and reflectively construct and return that `Request`. 
 
-The ProtocolHandler also consist a function called `handleOnMessage(ClientMessageEvent event)` that would be called inside the event listener that we have above. With the request parser this is what that function looks like:
+The ProtocolHandler also consist a function called `handleOnMessage(ClientMessageEvent event)` that would be called inside the event listener that we have above. With the request parser, this is what that function looks like:
 
 ```java
 public void handOnMessage(ClientMessageEvent event) {
@@ -529,7 +529,7 @@ public void handOnMessage(ClientMessageEvent event) {
 }
 ```
 
-Now that we’ve defined objects that we need. Let’s now talk about how Voxx-server handles each events above.
+Now that we’ve defined objects that we need. Let’s now talk about how Voxx-server handles each event above.
 
 #### On Client Connect
 
@@ -556,7 +556,7 @@ public void onClientMessage(ClientMessageEvent event) {
 
 At this point, on the abstraction layer, the client is already disconnected. Therefore, we really can’t do anything socket wise. So when Voxx gets this event, it does the following:
 
-- Checks if this client connection that disconnected was a supplemental connection or does not have an associated user.
+- Check if this client connection that disconnected was a supplemental connection or does not have an associated user.
   - If it doesn’t, we don’t need to do anything, so return and short the function.
 - Get the associated user for that client connection and remove the user from the `UserRegistry`
 - Broadcast that the client with the user info disconnected.
@@ -583,9 +583,9 @@ Currently, the Voxx java client connection is implemented using the classes `Cha
 
 ###### Login Controller
 
-`LoginController` is responsible for controlling the login screen of the application. When the scene is loaded , and the controller is initialized, it will construct the `ConnectionTask` and run it on a different thread. By default, Voxx will try to connect to the server with the address `localhost` and port `8008` (_which is the voxx-server running on local machine_). If there is no voxx-server running on localhost, the connection indicator will turn red. To connect to a different server, you can click the red dot and provide the server address and port using the following format: `server_addres:port`. The controller will now then try to connect to that new server.
+`LoginController` is responsible for controlling the login screen of the application. When the scene is loaded, and the controller is initialized, it will construct the `ConnectionTask` and run it on a different thread. By default, Voxx will try to connect to the server with the address `localhost` and port `8008` (_which is the voxx-server running on local machine_). If there is no voxx-server running on localhost, the connection indicator will turn red. To connect to a different server, you can click the red dot and provide the server address and port using the following format: `server_addres:port`. The controller will now then try to connect to that new server.
 
-Once connected, we now need to register a new user. To do so, we need to provide a username and click the `Start Chatting` button. It will check if the username that is entered is valid. We have designated a valid username to be between 4-7 characters, also allowing for numbers and underscores, however the username cannot start with numbers first. It then sends a request to the server to create a new user with the entered username. If the request is successful, the controller will now call `#setScene()` in the `PrimaryStageManager` to change the scene to the `Chatbox` scene.
+Once connected, we now need to register a new user. To do so, we need to provide a username and click the `Start Chatting` button. It will check if the username that is entered is valid. We have designated a valid username to be between 4-7 characters, also allowing for numbers and underscores, however, the username cannot start with numbers first. It then sends a request to the server to create a new user with the entered username. If the request is successful, the controller will now call `#setScene()` in the `PrimaryStageManager` to change the scene to the `Chatbox` scene.
 
 ###### Chat Controller
 
@@ -597,15 +597,15 @@ Currently, the Voxx java client connection is implemented utilizing the class `R
 
 ###### Request-Response Connection
 
-The implementation of the `ReqResClientConnection` follows the documentation above when it comes to the `Request-Response` connection. Therefore any request sent from this connection type will be blocking and will always wait for response from the server. 
+The implementation of the `ReqResClientConnection` follows the documentation above when it comes to the `Request-Response` connection. Therefore, any request sent from this connection type will be `blocking` and will always wait for a response from the server. 
 
 ###### Update Message Connection
 
-Like the `Response-Reques` connection, this connection type was also implemented by following the documentation about the Update message connection under the [Protocol](#protocol) hearder.
+Like the `Response-Reques` connection, this connection type was also implemented by following the documentation about the Update message connection under the [Protocol](#protocol) header.
 
 ###### ConnectionTask
 
-On top of the two connection implementation above, we also wrote a JavaFX task that would try connection to the server with `n` number of times. By default, this will try connecting to the defined address 3 times.
+On top of the two connection implementations above, we also wrote a JavaFX task that would try connection to the server with `n` number of times. By default, this will try connecting to the defined address 3 times.
 
 ###### Connection flow
 
@@ -620,9 +620,9 @@ graph TD;
 
 ### Voxx Client CLI
 
-Voxx CLI is a command line interface client for Voxx, it's written in python and has its own repo and added as a git sub module for the main Voxx repository.
+Voxx CLI is a command line interface client for Voxx, it's written in python and has its own repo and added as a git submodule for the main Voxx repository.
 
-Voxx CLI initially starts as a pure CLI application when connection has not been established yet. But as soon as the connection is established a valid user is registered, the CLI runs a text user interface (TUI) using the library `Textual`.
+Voxx CLI initially starts as a pure CLI application when a connection has not been established yet. But as soon as the connection is established a valid user is registered, the CLI runs a text user interface (TUI) using the library `Textual`.
 
 #### Modules
 
@@ -630,17 +630,17 @@ For Voxx cli, we have 4 modules. One of them is the main module which called `vo
 
 ##### voxx module
 
-The voxx module is actually not really a python file but it's just a directory with `__init__.py`  and `__main__.py` in it. This package/module also contains the other modules. However, under this header we'll just talk about the double underscore (dunder) files for now.
+The voxx module is actually not really a python file, but it's just a directory with `__init__.py`  and `__main__.py` in it. This package/module also contains the other modules. However, under this header, we'll just talk about the double underscore (dunder) files for now.
 
 ###### `__init.py__`
 
-This file effectively makes it so that this package/directory is considered a module. This file also contains meta data like the app name, version, author, and description, that we're going to use for `setuptool` when we install or build distribution for the python application.
+This file effectively makes it so that this package/directory is considered a module. This file also contains metadata like the app name, version, author, and description, that we're going to use for `setuptool` when we install or build distribution for the python application.
 
 ###### `__main__.py`
 
-This is essentially considered to be the main file for the module. It esssentially works as a main method for the module but inside of this file we also have a standard `if __name__ == __main__:` condition. This file is also the entry point of our cli application and setuptool is directed to make a script for it.
+This is essentially considered to be the main file for the module. It essentially works as a main method for the module, but inside this file we also have a standard `if __name__ == __main__:` condition. This file is also the entry point of our cli application, and `setuptool` is directed to make a script for it.
 
-Because this is our entry point, this is also where we initialized initialized our CLI structure. Using Python's `argparse` module, we have the following commands available:
+Because this is our entry point, this is also where we initialized our CLI structure. Using Python's `argparse` module, we have the following commands available:
 
 ```
 Usage: voxx-cli [options] <arg>
@@ -651,13 +651,13 @@ Usage: voxx-cli [options] <arg>
 -v   --version                   show program's version number and exit
 ```
 
-Unlike the JavaFX application voxx-cli does not need the registration scene and all of that is by the command line. Therefore when the text user interface or the TUI application is loaded, the connection to the server, both response-request and update message, has already been established. And this is done by passing in the command line arguments into the `establish_voxx_connection` function that could be found in the `connection` module.
+Unlike the JavaFX application voxx-cli does not need the registration scene, and all of that is by the command line. Therefore, when the text user interface or the TUI application is loaded, the connection to the server, both response-request and update message, has already been established. And this is done by passing in the command line arguments into the `establish_voxx_connection` function that could be found in the `connection` module.
 
 ##### connection module
 
-This module is a pretty straight forward module. The paradigm used on this module is mixed, both procedural and object oriented. The first part of the module essentially contains contants and the class definition of the connection type  `ResReqClient` and the `UMClient` which inherits the request-response connection but it also inherits a Thread. This is then followed by uninitialized global variables for those type classes that we are going to initialize later using the function `establish_voxx_connection(user: str, addr: tuple)`.
+This module is a pretty straight forward module. The paradigm used on this module is mixed, both procedural and object-oriented. The first part of the module essentially contains constants and the class definition of the connection type  `ResReqClient` and the `UMClient` which inherits the request-response connection, but it also inherits a Thread. This is then followed by uninitialized global variables for those type classes that we are going to initialize later using the function `establish_voxx_connection(user: str, addr: tuple)`.
 
-In this module, we also took advantage of Python decorators to register update message handlers that essentially just puts the function object into a dictionary. This dictionary is iterated over by the `UMClient` and see if there's any matching function. However for a function to be considered as a handler for update messages, the function name must match the update message id. For example, we want to handle new message updates (the key is `nm`) then the function name needs to be `nm`.
+In this module, we also took advantage of Python decorators to register update message handlers that essentially just puts the function object into a dictionary. This dictionary is iterated over by the `UMClient` and see if there's any matching function. However, for a function to be considered as a handler for update messages, the function name must match the update message id. For example, we want to handle new message updates (the key is `nm`) then the function name needs to be `nm`.
 
 ```python
 @um_handler
@@ -690,25 +690,25 @@ def register_user(username: str) -> SimpleNamespace:
     return res_req_conn.request({"request-id": "ru", "params": {"uname": username}})
 ```
 
-Functions for the other request defined under the protocl heading is also defined in this module.
+Functions for the other request defined under the protocol heading are also defined in this module.
 
 ##### model module
 
-This module is just a python version of the Java's `voxx.commons.module` package. The only difference is that the Python version of the UID does not have a generator since UID generation is going to be handled by the server anyways.
+This module is just a python version of the Java's `voxx.commons.module` package. The only difference is that the Python version of the UID does not have a generator since UID generation is going to be handled by the server anyway.
 
 ##### tui module
 
-Like I've mentioned, once the connection is establised from the connection module in the `__main__.py`, it will start the TUI application named Voxx. It's essentially a command line version of the `ChatBox` scene for the Java FX application. The only difference is that the TUI does not have the side bar that shows all of the connected users.
+Like I've mentioned, once the connection is established from the connection module in the `__main__.py`, it will start the TUI application named Voxx. It's essentially a command line version of the `ChatBox` scene for the Java FX application. The only difference is that the TUI does not have the sidebar that shows all the connected users.
 
 ###### The Voxx TUI App
 
-The class Voxx that could be found in the tui module is a sub class of a `Textual` `App`. Textual is a TUI library that allows us to render conventional UI models in a command line terminal. The TUI for Voxx is really simple, it just has one basic `screen` and inside of that screen is a `VerticalScroll` container, an `Input` field, and a `Footer`. 
+The class Voxx that could be found in the tui module is a subclass of a `Textual` `App`. Textual is a TUI library that allows us to render conventional UI models in a command line terminal. The TUI for Voxx is really simple, it just has one basic `screen` and inside that screen is a `VerticalScroll` container, an `Input` field, and a `Footer`. 
 
-The `VerticalScroll` will be used to inser two widget, the `MessageBar` and the `NotificationBar`.
+The `VerticalScroll` will be used to insert two widgets, the `MessageBar` and the `NotificationBar`.
 
 - Both MessageBar and NotificationBar are a subclass of the widget `Container` that has a border property and a `Static` text.
 
-For the input field, it was just left default and no other property changes was done to it. The same case goes for the `Footer` but it will house the bindings we registered for the application.
+For the input field, it was just left default and no other property changes were done to it. The same case goes for the `Footer` but it will house the bindings we registered for the application.
 
 Beyond the widgets, the update message handlers are also defined in this Voxx application class:
 
@@ -731,17 +731,17 @@ def ud(self, msg: SimpleNamespace) -> None:
     self.call_from_thread(self._add_notif, f'{msg.body.user.uname} has disconnected', 'User Disconnect', None)
 ```
 
-There is one important thing to note here, since the UpdateMessages are being listened to on a different thread, we need to make sure that we have our app call UI changes on the same thread of the TUI, this is why we use the function `App#call_from_thread` which is essentially the same as `Platform.runLater` for JavaFX.
+There is one important thing to note here; since the UpdateMessages are being listened to on a different thread, we need to make sure that we have our app call UI changes on the same thread of the TUI, this is why we use the function `App#call_from_thread` which is essentially the same as `Platform.runLater` for JavaFX.
 
 ## Project State
 
-All of the module described above is on its release state and you can download your own copy of every component of this project. The server and the client is coded to be universal so it works for both Windows, MacOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
+All the modules described above are in its release state, and you can download your own copy of every component of this project. The server and the client are coded to be universal, so it works for both Windows, macOS, and should also work for Linux. However, because of the lack of a local Linux machine, both of the Voxx clients status on those machines is unknown (The server will run perfectly on a Linux machine).
 
-Here are the instruction on how to get a ready to use artifact and executables for each component:
+Here is the instruction on how to get a ready-to-use artifact and executables for each component:
 
 ##### Voxx Server
 
-Every commit we do on the main branch of the Voxx GitHub repository, a workflow will be triggered to build the artifact for `voxx-common` and `voxx-sever` and those artifacts are automatically uploaded to my maven repository [repo.cyr1en.com](https://repo.cyr1en.com). To get a server copy, you need to find the latest server artifact which can be found under [`snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT`](https://repo.cyr1en.com/#/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT). Just scroll down and the naming convention of the artifact is `voxx-server-1.0-<build date>-<build number>.jar`. There are two ways to get the artifact, you can click the artifact and download it to your local machine. However if you want to run the voxx server on a server you can get the jarfile by using `wget`
+Every commit we do on the main branch of the Voxx GitHub repository, a workflow will be triggered to build the artifact for `voxx-common` and `voxx-sever` and those artifacts are automatically uploaded to my maven repository [repo.cyr1en.com](https://repo.cyr1en.com). To get a server copy, you need to find the latest server artifact which can be found under [`snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT`](https://repo.cyr1en.com/#/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT). Just scroll down and the naming convention of the artifact is `voxx-server-1.0-<build date>-<build number>.jar`. There are two ways to get the artifact, you can click the artifact and download it to your local machine. However, if you want to run the voxx server on a server, you can get the jarfile by using `wget`
 
 ```
 wget https://repo.cyr1en.com/snapshots/com/cyr1en/voxx-server/1.0-SNAPSHOT/voxx-server-1.0-20230504.024024-40.jar
@@ -774,17 +774,17 @@ Once done, you can now run the server. You can use `tmux` or `screen` if you're 
   java -Xms256M -jar voxx-server-1.0-20230504.024024-40.jar
   ```
 
-  - Just make sure you don't close the terminal window or else the server will shutdown.
+  - Just make sure you don't close the terminal window or else the server will shut down.
 
 ##### Voxx client
 
-Voxx has two client, a JavaFX client and a CLI client (written python). Here's an instruction on how to install each one of them,
+Voxx has two clients, a JavaFX client and a CLI client (written python). Here's an instruction on how to install each one of them:
 
 - Voxx Desktop Client (JavaFX)
 
   - You can get the latest installer on the release page of Voxx [here](https://github.com/CyR1en/Voxx/releases)
-    - An installer is available for windows and macos. For now there is no way to make an installer for Linux.
-  - Note: The installer is not signed, therefore your operating system will warn you when you run the installer
+    - An installer is available for windows and macOS. For now, there is no way to make an installer for Linux.
+  - Note: The installer is not signed, therefore, your operating system will warn you when you run the installer
 
 - Voxx CLI
 
@@ -796,7 +796,7 @@ Voxx has two client, a JavaFX client and a CLI client (written python). Here's a
     pip install voxx-cli
     ```
 
-  - Once installed you can just simply just run
+  - Once installed, you can just simply just run
 
     ```
     voxx-cli -h

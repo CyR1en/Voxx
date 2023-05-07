@@ -29,10 +29,10 @@ public class ProtocolHandler {
         public static Request parse(ClientMessageEvent event, VoxxServer server) {
             JSONObject json;
             try {
-                Server.LOGGER.info("Parsing: '{}'", event.getMessage());
+                VoxxServer.LOGGER.info("Parsing: '{}'", event.getMessage());
                 json = new JSONObject(event.getMessage());
             } catch (JSONException e) {
-                Server.LOGGER.info("Non-Json request from ({})",
+                VoxxServer.LOGGER.info("Non-Json request from ({})",
                         event.getClientConnection().getRemoteAddress());
                 return null;
             }
@@ -43,7 +43,7 @@ public class ProtocolHandler {
                 var req = optional.get();
                 return req.construct(server);
             } catch (Exception e) {
-                Server.LOGGER.error("Unable to parse message json from message");
+                VoxxServer.LOGGER.error("Unable to parse message json from message");
                 return null;
             }
         }

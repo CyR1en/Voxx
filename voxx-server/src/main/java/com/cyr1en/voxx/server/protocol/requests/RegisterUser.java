@@ -1,6 +1,5 @@
 package com.cyr1en.voxx.server.protocol.requests;
 
-import com.cyr1en.voxx.commons.esal.Server;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;
@@ -51,12 +50,12 @@ public class RegisterUser implements Request {
         if (userRegistry.isRegistered(uname)) {
             var cc = event.getClientConnection();
             cc.sendMessage(String.format(INCORRECT_ARG, uname));
-            Server.LOGGER.warn("[Vox] Client ({}) attempted to register with existing username.",
+            VoxxServer.LOGGER.warn("Client ({}) attempted to register with existing username.",
                     remoteAddr);
         } else {
             var user = userRegistry.registerNewUser(uname);
             event.getClientConnection().setAssocUser(user);
-            Server.LOGGER.info("[Vox] Client ({}) registered as user: {}", remoteAddr, uname);
+            VoxxServer.LOGGER.info("Client ({}) registered as user: {}", remoteAddr, uname);
             event.getClientConnection().sendMessage(String.format(RESPONSE, "\"response-id\": 1",
                     user.getUID().asLong(), user.getUsername()));
 

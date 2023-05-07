@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
 
-    public static final Logger LOGGER = LogManager.getLogger(Server.class);
+    public static final Logger LOGGER = LogManager.getLogger("AbstractionLayer");
 
     private final int port;
     private final int backlog;

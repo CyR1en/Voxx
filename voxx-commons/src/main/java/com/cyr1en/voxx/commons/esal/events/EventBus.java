@@ -83,7 +83,7 @@ public class EventBus {
      * the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
      * <p>
      * This uses reflection that looks at the declared methods in the class and filters methods
-     * with the {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} annotation. After that it checks if it exactly has one parameter
+     * with the {@link EventListener} annotation. After that it checks if it exactly has one parameter
      * because we are only trying to have one event to listen to for this function. If that condition
      * is satisfied, it will accept the {@link BiConsumer} (as a callback function) passing the type of the
      * parameter and the {@link Method} itself.
@@ -93,7 +93,8 @@ public class EventBus {
      */
     private void iterateAnnotatedFunctions(Listener listener, BiConsumer<Class<?>, Method> onVisit) {
         var methods = listener.getClass().getDeclaredMethods();
-        Arrays.stream(methods).filter(method -> method.isAnnotationPresent(com.cyr1en.voxx.commons.esal.events.annotation.EventListener.class))
+        Arrays.stream(methods)
+                .filter(method -> method.isAnnotationPresent(EventListener.class))
                 .forEach(filtered -> {
                     if (filtered.getParameterCount() > 1) return;
                     onVisit.accept(filtered.getParameterTypes()[0], filtered);
@@ -113,6 +114,7 @@ public class EventBus {
      * that contains sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
      *
      * @param event event to post.
+     * @param runAfter callback
      * @param <T>   The type of the event.
      */
     public <T> void post(T event, Runnable runAfter) {
@@ -145,6 +147,12 @@ public class EventBus {
         }
     }
 
+    /**
+     * Post function with no callback
+     *
+     * @param event event to post
+     * @param <T>   Type of event to post
+     */
     public <T> void post(T event) {
         post(event, () -> {
         });
@@ -190,6 +198,7 @@ public class EventBus {
      * A super basic listener that does not have any methods to implement. It's sole purpose is purely
      * semantics so that in code, it is clear that we're actually dealing with listeners for an event.¬
      */
-    public interface Listener { }
+    public interface Listener {
+    }
 
 }

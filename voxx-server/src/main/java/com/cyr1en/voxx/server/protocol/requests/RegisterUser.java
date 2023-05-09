@@ -10,7 +10,6 @@ public class RegisterUser implements Request {
     private static final String INCORRECT_ARG;
     private static final String RESPONSE;
 
-    private final String reqID;
     private final VoxxServer voxx;
 
     static {
@@ -36,7 +35,6 @@ public class RegisterUser implements Request {
     }
 
     public RegisterUser(VoxxServer voxx) {
-        this.reqID = "ru";
         this.voxx = voxx;
     }
 

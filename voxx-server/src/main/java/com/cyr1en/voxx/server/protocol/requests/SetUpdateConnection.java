@@ -1,6 +1,5 @@
 package com.cyr1en.voxx.server.protocol.requests;
 
-import com.cyr1en.voxx.commons.esal.Server;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;
@@ -12,11 +11,9 @@ import java.util.Objects;
  * Set the connection to the client an update connection.
  */
 public class SetUpdateConnection implements Request {
-    private final VoxxServer voxxServer;
     private final VoxxServer.UserRegistry userRegistry;
 
     public SetUpdateConnection(VoxxServer voxxServer) {
-        this.voxxServer = voxxServer;
         this.userRegistry = voxxServer.getUserRegistry();
     }
 

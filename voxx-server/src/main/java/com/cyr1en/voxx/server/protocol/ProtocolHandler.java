@@ -1,6 +1,5 @@
 package com.cyr1en.voxx.server.protocol;
 
-import com.cyr1en.voxx.commons.esal.Server;
 import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.protocol.Request;
 import com.cyr1en.voxx.server.VoxxServer;

@@ -1,7 +1,5 @@
 package com.cyr1en.voxx.commons.esal.events;
 
-import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;

@@ -133,7 +133,7 @@ public class UID {
     /**
      * A thread safe utility class to generate {@link UID} across multiple threads.
      * <p>
-     * This should allow for when multiple threads requests to generate a UID on the same timestamp and
+     * This should allow for multiple threads requests to generate a UID on the same timestamp and
      * using the first 12 bits of the 54 bits that's used to store their incremental count.
      */
     public static class Generator {
@@ -144,9 +144,9 @@ public class UID {
         /**
          * A synchronized method that generates UID for absolute unique identifiable descriptor
          * <p>
-         * Since time only moves forward and last 52 bits is set to that bits. We just need to check
+         * Since time only moves forward and the last 52 bits are set to that bit. We just need to check
          * if we're still generating within the same timestamp. If we are, we increment the incremental
-         * part of the UID which is the first 12 bits. Allowing us to have up to 4095 (0xFFF) incremental
+         * part of the UID, which is the first 12 bits. Allowing us to have up to 4095 (0xFFF) incremental
          * descriptors for a timestamp.
          * <p>
          * It's highly unlikely that we will punch through 4095 (0xFFF) incrementation with our application. Even

@@ -84,11 +84,11 @@ public class VoxxServer extends Server implements EventBus.Listener {
 
     public static class UserRegistry {
         /**
-         * It is pretty redundant to have the username as a key for this map since User encapsulates this data type.
+         * It is pretty redundant to have the username as a key for this map since the User encapsulates this data type.
          * However, to mitigate {@link java.util.ConcurrentModificationException} across multiple client threads.
          * I've decided to opt with using a {@link ConcurrentHashMap} for faster user CRUD.
          */
-        private ConcurrentHashMap<String, User> userMap;
+        private final ConcurrentHashMap<String, User> userMap;
 
         public UserRegistry() {
             userMap = new ConcurrentHashMap<>();

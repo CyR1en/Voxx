@@ -7,10 +7,8 @@ import com.cyr1en.voxx.server.VoxxServer;
 import org.json.JSONObject;
 
 public class Ping implements Request {
-    private final VoxxServer server;
 
     Ping(VoxxServer voxx) {
-        this.server = voxx;
     }
 
     @Override

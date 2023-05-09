@@ -9,11 +9,9 @@ import org.json.JSONObject;
 
 public class UserList implements Request {
 
-    private final VoxxServer voxxServer;
     private final VoxxServer.UserRegistry userRegistry;
 
     public UserList(VoxxServer voxxServer) {
-        this.voxxServer = voxxServer;
         this.userRegistry = voxxServer.getUserRegistry();
     }
 

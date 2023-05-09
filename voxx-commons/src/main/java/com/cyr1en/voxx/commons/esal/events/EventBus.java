@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
 
 /**
  * A simple multithreaded implementation of an event bus pattern.
@@ -78,10 +79,10 @@ public class EventBus {
 
     /**
      * A helper function to iterate through every function in the {@link Listener} object with
-     * the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
+     * the annotation {@link EventListener}
      * <p>
      * This uses reflection that looks at the declared methods in the class and filters methods
-     * with the {@link EventListener} annotation. After that it checks if it exactly has one parameter
+     * with the {@link EventListener} annotation. After that, it checks if it exactly has one parameter
      * because we are only trying to have one event to listen to for this function. If that condition
      * is satisfied, it will accept the {@link BiConsumer} (as a callback function) passing the type of the
      * parameter and the {@link Method} itself.
@@ -109,7 +110,7 @@ public class EventBus {
      * advantage of that instead of making a new single-thread executor for every listener.
      * <p>
      * Since this invokes each listener across multiple threads, use `synchronized` for objects
-     * that contains sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
+     * that contain sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
      *
      * @param event event to post.
      * @param runAfter callback

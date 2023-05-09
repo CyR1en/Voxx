@@ -12,13 +12,13 @@ import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
  * A simple multithreaded implementation of an event bus pattern.
  *
  * <p>
- * This implementation as mentioned above, is multithreaded, therefore it won't block
+ * This implementation, as mentioned above, is multithreaded, therefore, it won't block
  * the main thread. Multithreading is handled through an {@link ExecutorService} that
  * we can set. By default, the executor service is set as a single thread executor.
  * However, if we chose to set a {@link ThreadPoolExecutor} instead, we can do so
  * and the {@link EventBus#post(Object)} function will adapt accordingly.
  * <p>
- * Usage of this map is very simple. Any object can be an event if we chose to do so.
+ * Usage of this map is straightforward. Any object can be an event if we chose to do so.
  * To make a listener for that event, we can make a class that implements {@link Listener}
  * and make a function with the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} and have its parameter
  * set as the event type we want to listen to. To invoke the listeners, we need to call

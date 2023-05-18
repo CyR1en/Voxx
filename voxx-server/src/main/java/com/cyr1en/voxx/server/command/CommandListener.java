@@ -7,32 +7,33 @@ import java.util.Scanner;
 public class CommandListener implements Runnable {
     private volatile boolean running;
     private final VoxxServer voxxServer;
+    private final Scanner in;
 
     public CommandListener(VoxxServer voxxServer) {
         this.voxxServer = voxxServer;
+        in = new Scanner(System.in);
     }
 
     public void onCommand(String command) {
         if (command.equalsIgnoreCase("exit")) {
             running = false;
+            in.close();
             voxxServer.close();
+            System.exit(0);
         }
     }
 
 
     public void run() {
         running = true;
-        var scanner = new Scanner(System.in);
-
         while (running) {
-            String command = scanner.nextLine();
+            String command = in.nextLine();
             System.out.printf("\033[%dA", 1);
             System.out.print("\033[2K");
             VoxxServer.LOGGER.info("Command: " + command);
             onCommand(command);
         }
-
-        scanner.close();
+        in.close();
     }
 
     public void stop() {

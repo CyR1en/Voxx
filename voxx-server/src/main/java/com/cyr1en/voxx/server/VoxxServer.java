@@ -31,8 +31,7 @@ public class VoxxServer extends Server implements EventBus.Listener {
         getEventBus().subscribeListeners(this);
         this.userRegistry = new UserRegistry();
         this.protocolHandler = new ProtocolHandler(this);
-        run();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> getClientConnections().forEach(ClientConnection::close)));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
     public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {
@@ -76,6 +75,12 @@ public class VoxxServer extends Server implements EventBus.Listener {
                 .put("uname", user.getUsername()));
         responseJson.put("body", body);
         broadcastWithExclusions(user, responseJson);
+    }
+
+    public void close() {
+        var connections = getClientConnections();
+        if (Objects.isNull(connections) || connections.isEmpty()) return;
+        getClientConnections().forEach(ClientConnection::close);
     }
 
     public UserRegistry getUserRegistry() {

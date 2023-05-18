@@ -10,6 +10,7 @@ import com.cyr1en.voxx.commons.esal.events.server.ClientMessageEvent;
 import com.cyr1en.voxx.commons.model.UID;
 import com.cyr1en.voxx.commons.model.User;
 import com.cyr1en.voxx.commons.protocol.ProtocolUtil;
+import com.cyr1en.voxx.server.command.CommandListener;
 import com.cyr1en.voxx.server.protocol.ProtocolHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,7 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class VoxxServer extends Server implements EventBus.Listener {
@@ -31,7 +33,9 @@ public class VoxxServer extends Server implements EventBus.Listener {
         getEventBus().subscribeListeners(this);
         this.userRegistry = new UserRegistry();
         this.protocolHandler = new ProtocolHandler(this);
+        Executors.newSingleThreadExecutor().execute(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+        new CommandListener(this).run();
     }
 
     public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {

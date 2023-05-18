@@ -6,19 +6,18 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import com.cyr1en.voxx.commons.esal.events.annotation.EventListener;
 
 /**
  * A simple multithreaded implementation of an event bus pattern.
  *
  * <p>
- * This implementation, as mentioned above, is multithreaded, therefore, it won't block
+ * This implementation as mentioned above, is multithreaded, therefore it won't block
  * the main thread. Multithreading is handled through an {@link ExecutorService} that
  * we can set. By default, the executor service is set as a single thread executor.
  * However, if we chose to set a {@link ThreadPoolExecutor} instead, we can do so
  * and the {@link EventBus#post(Object)} function will adapt accordingly.
  * <p>
- * Usage of this map is straightforward. Any object can be an event if we chose to do so.
+ * Usage of this map is very simple. Any object can be an event if we chose to do so.
  * To make a listener for that event, we can make a class that implements {@link Listener}
  * and make a function with the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} and have its parameter
  * set as the event type we want to listen to. To invoke the listeners, we need to call
@@ -79,10 +78,10 @@ public class EventBus {
 
     /**
      * A helper function to iterate through every function in the {@link Listener} object with
-     * the annotation {@link EventListener}
+     * the annotation {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener}
      * <p>
      * This uses reflection that looks at the declared methods in the class and filters methods
-     * with the {@link EventListener} annotation. After that, it checks if it exactly has one parameter
+     * with the {@link com.cyr1en.voxx.commons.esal.events.annotation.EventListener} annotation. After that it checks if it exactly has one parameter
      * because we are only trying to have one event to listen to for this function. If that condition
      * is satisfied, it will accept the {@link BiConsumer} (as a callback function) passing the type of the
      * parameter and the {@link Method} itself.
@@ -92,12 +91,24 @@ public class EventBus {
      */
     private void iterateAnnotatedFunctions(Listener listener, BiConsumer<Class<?>, Method> onVisit) {
         var methods = listener.getClass().getDeclaredMethods();
-        Arrays.stream(methods)
-                .filter(method -> method.isAnnotationPresent(EventListener.class))
+        Arrays.stream(methods).filter(method -> method.isAnnotationPresent(com.cyr1en.voxx.commons.esal.events.annotation.EventListener.class))
                 .forEach(filtered -> {
                     if (filtered.getParameterCount() > 1) return;
                     onVisit.accept(filtered.getParameterTypes()[0], filtered);
                 });
+    }
+
+    /**
+     * Function that invokes all the listeners for the event T.
+     * <p>
+     * Overloaded function for post(T event, Runnable callback) that doesn't accept a {@link Runnable}
+     *
+     * @param event event to post.
+     * @param <T>   The type of the event.
+     */
+    public <T> void post(T event) {
+        post(event, () -> {
+        });
     }
 
     /**
@@ -110,10 +121,9 @@ public class EventBus {
      * advantage of that instead of making a new single-thread executor for every listener.
      * <p>
      * Since this invokes each listener across multiple threads, use `synchronized` for objects
-     * that contain sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
+     * that contains sensitive data or use {@link java.util.concurrent.atomic.AtomicReference}.
      *
      * @param event event to post.
-     * @param runAfter callback
      * @param <T>   The type of the event.
      */
     public <T> void post(T event, Runnable runAfter) {
@@ -122,39 +132,102 @@ public class EventBus {
         if (Objects.isNull(eventListeners)) return;
 
         var executor = executorServiceSupplier.get();
-        var isThreadPool = executor instanceof ThreadPoolExecutor;
+        if (executor instanceof ThreadPoolExecutor) {
+            postThreadPool(event, runAfter, eventListeners);
+        } else {
+            postSingleThread(event, runAfter, eventListeners);
+        }
+    }
+
+    /**
+     * Function that invokes all the listeners for the event T.
+     * <p>
+     * This function assumes that the {@link ExecutorService} provided by the {@link Supplier} is a {@link ThreadPoolExecutor}.
+     *
+     * @param event          event to post.
+     * @param runAfter       runnable to run after all the listeners are invoked.
+     * @param eventListeners list of listeners to invoke.
+     * @param <T>            The type of the event.
+     */
+    private <T> void postThreadPool(T event, Runnable runAfter, List<ListenerMethod> eventListeners) {
+        var threadPool = (ThreadPoolExecutor) executorServiceSupplier.get();
         for (var listener : eventListeners) {
-            if (!isThreadPool) executor = executorServiceSupplier.get();
-            executor.execute(() -> {
+            threadPool.execute(() -> {
                 try {
                     listener.invoke(event);
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             });
-            if (!isThreadPool) executor.shutdown();
         }
-        if (isThreadPool) {
-            executor.shutdown();
-            try {
-                var finished = executor.awaitTermination(1, TimeUnit.SECONDS);
-                if (finished)
-                    runAfter.run();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        threadPool.shutdown();
+        runAfter.run();
     }
 
     /**
-     * Post function with no callback
+     * Function that invokes all the listeners for the event T.
+     * <p>
+     * This function assumes that the {@link ExecutorService} provided by the {@link Supplier} is a single-thread executor.
      *
-     * @param event event to post
-     * @param <T>   Type of event to post
+     * @param event          event to post.
+     * @param runAfter       runnable to run after all the listeners are invoked.
+     * @param eventListeners list of listeners to invoke.
+     * @param <T>            The type of the event.
      */
-    public <T> void post(T event) {
-        post(event, () -> {
+    private <T> void postSingleThread(T event, Runnable runAfter, List<ListenerMethod> eventListeners) {
+        var executors = new ArrayList<ExecutorService>();
+        for (var listener : eventListeners) {
+            var executor = executorServiceSupplier.get();
+            executors.add(executor);
+            executor.execute(() -> invokeMethod(listener, event));
+            executor.shutdown();
+        }
+        runAfterSingleThread(runAfter, executors);
+    }
+
+    /**
+     * Function that makes sure that all single thread {@link ExecutorService} are shutdown before running the {@link Runnable}
+     * runAfter.
+     *
+     * @param runAfter  runnable to run after all the listeners are invoked.
+     * @param executors list of executors to shut down.
+     */
+    private void runAfterSingleThread(Runnable runAfter, List<ExecutorService> executors) {
+        var runAfterExec = executorServiceSupplier.get();
+        runAfterExec.execute(() -> {
+            var notFinished = executors.stream().filter(e -> !e.isShutdown()).toList();
+            try {
+                for (var es : notFinished) {
+                    es.shutdown();
+                    var done = es.awaitTermination(1, TimeUnit.SECONDS);
+                    if (!done) {
+                        es.shutdownNow();
+                        throw new RuntimeException("ExecutorService did not shutdown in time.");
+                    }
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                runAfter.run();
+            }
         });
+    }
+
+    /**
+     * Function that invokes a {@link ListenerMethod} using the event T.
+     * <p>
+     * This is a utility function for both postSingleThread and postThreadPool.
+     *
+     * @param listener the listener method to invoke.
+     * @param event    the event to pass to the listener method.
+     * @param <T>      The type of the event.
+     */
+    private <T> void invokeMethod(ListenerMethod listener, T event) {
+        try {
+            listener.invoke(event);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -21,18 +21,23 @@ public class UIDTest {
     public synchronized void testUnique() throws InterruptedException {
         var list = new ArrayList<UID>();
 
+        var threadPool = Executors.newCachedThreadPool();
         for (int i = 0; i < 20; i++) {
-            var exec = Executors.newSingleThreadExecutor();
-            exec.execute(() -> {
+            threadPool.execute(() -> {
                 var uid = UID.Generator.generate();
                 list.add(uid);
-                exec.shutdown();
             });
-            if (i % 3 == 0) Thread.sleep(1000);
+            if (i % 5 == 0) Thread.sleep(1000);
         }
-
-        // Allow the UID generation to finish
-        Thread.sleep(1000);
+        threadPool.shutdown();
+        try {
+            var isShutDown = threadPool.awaitTermination(1, java.util.concurrent.TimeUnit.MINUTES);
+            if (!isShutDown) throw new RuntimeException("Thread pool did not shut down");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdownNow();
+        }
 
         list.sort((o1, o2) -> {
             var diff = (int) (o1.getTimestamp() - o2.getTimestamp());

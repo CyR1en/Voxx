@@ -18,23 +18,31 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class VoxxServer extends Server implements EventBus.Listener {
 
     private final UserRegistry userRegistry;
     private final ProtocolHandler protocolHandler;
+    private final CommandListener commandListener;
+    private final ExecutorService abstarctionLayerExecutor;
     public static final Logger LOGGER = LogManager.getLogger("Voxx");
+
 
     public VoxxServer() {
         super(8008, 500);
         getEventBus().setExecutorServiceSupplier(Executors::newCachedThreadPool);
         getEventBus().subscribeListeners(this);
         this.userRegistry = new UserRegistry();
+        this.commandListener = new CommandListener(this);
         this.protocolHandler = new ProtocolHandler(this);
-        Executors.newSingleThreadExecutor().execute(this);
+
+        this.abstarctionLayerExecutor = Executors.newSingleThreadExecutor();
+        abstarctionLayerExecutor.execute(this);
+
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
-        new CommandListener(this).run();
+        commandListener.run();
     }
 
     public synchronized void broadcastWithExclusions(User excludedUser, JSONObject object) {
@@ -81,6 +89,12 @@ public class VoxxServer extends Server implements EventBus.Listener {
     }
 
     public void close() {
+        if (commandListener != null && commandListener.isRunning())
+            commandListener.stop();
+
+        if (abstarctionLayerExecutor != null && !abstarctionLayerExecutor.isShutdown())
+            abstarctionLayerExecutor.shutdownNow();
+
         var connections = getClientConnections();
         if (Objects.isNull(connections) || connections.isEmpty()) return;
         getClientConnections().forEach(ClientConnection::close);

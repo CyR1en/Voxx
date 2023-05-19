@@ -23,7 +23,6 @@ public class CommandListener implements Runnable {
         }
     }
 
-
     public void run() {
         running = true;
         while (running) {
@@ -34,6 +33,10 @@ public class CommandListener implements Runnable {
             onCommand(command);
         }
         in.close();
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     public void stop() {
